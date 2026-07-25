@@ -1,0 +1,1974 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Bearing Fault DL — ANN · CNN · RNN · LSTM</title><style>:root {
+    --ink: #0b0c14;
+    --ink1: #111220;
+    --ink2: #181928;
+    --ink3: #1f2035;
+    --ink4: #262842;
+    --rim: #2e3058;
+    --rim2: #3b3e6b;
+    --rim3: #4a4e80;
+    --fg: #dde0f0;
+    --fg2: #9ca3cc;
+    --fg3: #5c6399;
+    --volt: #7fff5a;
+    --volt2: #5ec440;
+    --volt3: #3d8a29;
+    --cyan: #38e0f0;
+    --cyan2: #1fbdcc;
+    --cyan3: #0d7d8a;
+    --purple: #b06fff;
+    --purple2: #8a4fd4;
+    --purple3: #5c2fa3;
+    --amber: #ffb830;
+    --amber2: #d4922a;
+    --rose: #ff5c7a;
+    --rose2: #cc3a57;
+    --mono: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    --sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --r: 10px;
+    --r-sm: 6px;
+    --r-lg: 16px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 15px
+}
+
+body {
+    background: var(--ink);
+    color: var(--fg);
+    font-family: var(--sans);
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px
+}
+
+::-webkit-scrollbar-track {
+    background: var(--ink1)
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--rim2);
+    border-radius: 3px
+}
+
+/* ── LAYOUT ── */
+.shell {
+    display: flex;
+    height: 100vh;
+    overflow: hidden
+}
+
+.rail {
+    width: 270px;
+    min-width: 270px;
+    background: var(--ink1);
+    border-right: 1px solid var(--rim);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width .25s
+}
+
+.rail.off {
+    width: 0;
+    min-width: 0;
+    border: none;
+    overflow: hidden
+}
+
+.main-wrap {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column
+}
+
+/* ── RAIL ── */
+.rail-top {
+    padding: 18px 16px 12px;
+    border-bottom: 1px solid var(--rim);
+    flex-shrink: 0
+}
+
+.rail-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px
+}
+
+.brand-icon {
+    width: 34px;
+    height: 34px;
+    background: linear-gradient(135deg, var(--volt), var(--cyan));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0
+}
+
+.brand-text {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.3
+}
+
+.brand-text em {
+    color: var(--volt);
+    font-style: normal
+}
+
+.prog-shell {
+    background: var(--ink2);
+    border: 1px solid var(--rim);
+    border-radius: 5px;
+    padding: 8px 12px
+}
+
+.prog-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--fg3);
+    margin-bottom: 5px
+}
+
+.prog-track {
+    height: 3px;
+    background: var(--rim);
+    border-radius: 2px;
+    overflow: hidden
+}
+
+.prog-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--volt), var(--cyan));
+    border-radius: 2px;
+    transition: width .4s
+}
+
+.rail-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px
+}
+
+.nav-grp {
+    margin-bottom: 4px
+}
+
+.nav-grp-lbl {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--fg3);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    padding: 6px 10px 3px;
+    display: flex;
+    align-items: center;
+    gap: 6px
+}
+
+.nav-grp-lbl::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rim)
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12.5px;
+    color: var(--fg2);
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    transition: all .15s;
+    white-space: nowrap;
+    overflow: hidden
+}
+
+.nav-btn:hover {
+    background: var(--ink3);
+    color: var(--fg)
+}
+
+.nav-btn.on {
+    background: var(--ink4);
+    color: var(--volt);
+    border-left: 2px solid var(--volt);
+    padding-left: 8px
+}
+
+.nav-btn.done .n-dot {
+    background: var(--volt);
+    color: var(--ink)
+}
+
+.n-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--rim);
+    font-size: 9px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--fg3)
+}
+
+.nav-btn.on .n-dot {
+    background: var(--volt);
+    color: var(--ink)
+}
+
+/* ── TOPBAR ── */
+.topbar {
+    height: 52px;
+    background: var(--ink);
+    border-bottom: 1px solid var(--rim);
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+    gap: 12px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 40
+}
+
+.tb-toggle {
+    width: 30px;
+    height: 30px;
+    background: var(--ink2);
+    border: 1px solid var(--rim);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fg2);
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: all .15s
+}
+
+.tb-toggle:hover {
+    background: var(--ink3)
+}
+
+.tb-title {
+    font-size: 13px;
+    font-weight: 600;
+    flex: 1
+}
+
+.tb-pill {
+    padding: 3px 11px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid;
+    cursor: pointer;
+    transition: all .15s
+}
+
+.pill-volt {
+    border-color: var(--volt);
+    color: var(--volt)
+}
+
+.pill-volt:hover {
+    background: var(--volt);
+    color: var(--ink)
+}
+
+.pill-cyan {
+    border-color: var(--cyan);
+    color: var(--cyan)
+}
+
+.pill-cyan:hover {
+    background: var(--cyan);
+    color: var(--ink)
+}
+
+/* ── CONTENT ── */
+.content {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 36px 40px 100px;
+    width: 100%
+}
+
+.sec {
+    display: none
+}
+
+.sec.vis {
+    display: block
+}
+
+/* ── HERO ── */
+.sec-eyebrow {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--volt);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px
+}
+
+.sec-eyebrow::before {
+    content: '';
+    width: 20px;
+    height: 2px;
+    background: var(--volt);
+    flex-shrink: 0
+}
+
+.sec-h {
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -.4px;
+    margin-bottom: 10px
+}
+
+.sec-h .hi {
+    color: var(--volt)
+}
+
+.sec-h .hi2 {
+    color: var(--cyan)
+}
+
+.sec-h .hi3 {
+    color: var(--purple)
+}
+
+.sec-sub {
+    font-size: 15px;
+    color: var(--fg2);
+    max-width: 680px;
+    margin-bottom: 28px
+}
+
+/* ── CARDS ── */
+.card {
+    background: var(--ink2);
+    border: 1px solid var(--rim);
+    border-radius: var(--r);
+    padding: 22px;
+    margin-bottom: 16px
+}
+
+.card:hover {
+    border-color: var(--rim2)
+}
+
+.card.volt {
+    border-left: 3px solid var(--volt)
+}
+
+.card.cyan {
+    border-left: 3px solid var(--cyan)
+}
+
+.card.purple {
+    border-left: 3px solid var(--purple)
+}
+
+.card.amber {
+    border-left: 3px solid var(--amber)
+}
+
+.card.rose {
+    border-left: 3px solid var(--rose)
+}
+
+.card.rim {
+    border-left: 3px solid var(--rim3)
+}
+
+.card-h {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px
+}
+
+.card p,
+.card li {
+    color: var(--fg2);
+    font-size: 13.5px
+}
+
+.card ul,
+.card ol {
+    padding-left: 18px;
+    margin-top: 6px
+}
+
+.card li {
+    margin-bottom: 5px
+}
+
+/* ── CALLOUTS ── */
+.box {
+    border-radius: var(--r-sm);
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-left: 3px solid;
+    display: flex;
+    gap: 12px
+}
+
+.box-ico {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px
+}
+
+.box-body {
+    flex: 1
+}
+
+.box-title {
+    font-size: 12.5px;
+    font-weight: 700;
+    margin-bottom: 3px
+}
+
+.box-text {
+    font-size: 12.5px;
+    color: var(--fg2);
+    line-height: 1.6
+}
+
+.box.info {
+    background: rgba(56, 224, 240, .06);
+    border-color: var(--cyan)
+}
+
+.box.info .box-title {
+    color: var(--cyan)
+}
+
+.box.warn {
+    background: rgba(255, 184, 48, .06);
+    border-color: var(--amber)
+}
+
+.box.warn .box-title {
+    color: var(--amber)
+}
+
+.box.ok {
+    background: rgba(127, 255, 90, .06);
+    border-color: var(--volt)
+}
+
+.box.ok .box-title {
+    color: var(--volt)
+}
+
+.box.err {
+    background: rgba(255, 92, 122, .06);
+    border-color: var(--rose)
+}
+
+.box.err .box-title {
+    color: var(--rose)
+}
+
+.box.note {
+    background: rgba(176, 111, 255, .06);
+    border-color: var(--purple)
+}
+
+.box.note .box-title {
+    color: var(--purple)
+}
+
+/* ── CODE ── */
+code {
+    background: var(--ink3);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--cyan)
+}
+
+.code-block {
+    position: relative;
+    margin: 16px 0
+}
+
+.code-block pre {
+    background: var(--ink1);
+    border: 1px solid var(--rim);
+    border-radius: var(--r);
+    padding: 20px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.65;
+    color: var(--fg);
+    tab-size: 4
+}
+
+.code-block .cb-label {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 4px 12px;
+    background: var(--ink3);
+    border-radius: 0 var(--r) 0 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--fg3);
+    text-transform: uppercase;
+    letter-spacing: .05em
+}
+
+.k {
+    color: var(--purple)
+}
+
+.s {
+    color: var(--volt)
+}
+
+.c {
+    color: var(--fg3);
+    font-style: italic
+}
+
+.f {
+    color: var(--cyan)
+}
+
+.n {
+    color: var(--amber)
+}
+
+.t {
+    color: var(--rose)
+}
+
+.line-note {
+    display: inline-block;
+    margin-left: 8px;
+    color: var(--fg3);
+    font-size: 11px
+}
+
+/* ── MATH ── */
+.math {
+    background: var(--ink1);
+    border: 1px solid var(--rim);
+    border-radius: var(--r-sm);
+    padding: 16px 20px;
+    margin: 12px 0;
+    font-family: var(--mono);
+    font-size: 13px;
+    overflow-x: auto
+}
+
+.math.center {
+    text-align: center;
+    font-size: 15px
+}
+
+.eq {
+    color: var(--amber);
+    font-size: 16px;
+    display: block;
+    text-align: center;
+    padding: 8px 0
+}
+
+.vv {
+    color: var(--volt)
+}
+
+.vc {
+    color: var(--cyan)
+}
+
+.vp {
+    color: var(--purple)
+}
+
+.va {
+    color: var(--amber)
+}
+
+.vr {
+    color: var(--rose)
+}
+
+/* ── TABLES ── */
+.tbl-wrap {
+    overflow-x: auto;
+    margin: 16px 0
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px
+}
+
+th {
+    background: var(--ink3);
+    padding: 9px 12px;
+    text-align: left;
+    font-weight: 700;
+    border: 1px solid var(--rim);
+    color: var(--fg);
+    white-space: nowrap
+}
+
+td {
+    padding: 9px 12px;
+    border: 1px solid var(--rim);
+    color: var(--fg2);
+    vertical-align: top
+}
+
+tr:hover td {
+    background: var(--ink2)
+}
+
+.g {
+    color: var(--volt)
+}
+
+.b {
+    color: var(--rose)
+}
+
+.y {
+    color: var(--amber)
+}
+
+/* ── GRID ── */
+.g2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 14px 0
+}
+
+.g3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    margin: 14px 0
+}
+
+.g4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 14px 0
+}
+
+/* ── STAT CARDS ── */
+.stat {
+    background: var(--ink2);
+    border: 1px solid var(--rim);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center
+}
+
+.stat-n {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1
+}
+
+.stat-l {
+    font-size: 11px;
+    color: var(--fg3);
+    margin-top: 3px
+}
+
+/* ── SHAPE DIAGRAMS ── */
+.shape-flow {
+    background: var(--ink1);
+    border: 1px solid var(--rim);
+    border-radius: var(--r);
+    padding: 20px;
+    margin: 16px 0;
+    overflow-x: auto
+}
+
+.sf-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 12px
+}
+
+.sf-box {
+    background: var(--ink3);
+    border: 1px solid var(--rim2);
+    border-radius: 6px;
+    padding: 8px 14px;
+    text-align: center;
+    min-width: 100px
+}
+
+.sf-box.hi {
+    border-color: var(--volt);
+    background: rgba(127, 255, 90, .06)
+}
+
+.sf-box.hi2 {
+    border-color: var(--cyan);
+    background: rgba(56, 224, 240, .06)
+}
+
+.sf-box.hi3 {
+    border-color: var(--purple);
+    background: rgba(176, 111, 255, .06)
+}
+
+.sf-box.hi4 {
+    border-color: var(--amber);
+    background: rgba(255, 184, 48, .06)
+}
+
+.sf-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--fg3);
+    text-transform: uppercase;
+    letter-spacing: .06em
+}
+
+.sf-shape {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--amber);
+    font-family: var(--mono);
+    margin-top: 2px
+}
+
+.sf-arrow {
+    color: var(--fg3);
+    font-size: 18px;
+    flex-shrink: 0
+}
+
+/* ── ACCORDION / TABS ── */
+.acc {
+    border: 1px solid var(--rim);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 7px
+}
+
+.acc-h {
+    padding: 12px 18px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--ink2);
+    transition: background .15s;
+    -webkit-user-select: none;
+    user-select: none
+}
+
+.acc-h:hover {
+    background: var(--ink3)
+}
+
+.acc-q {
+    font-size: 13px;
+    font-weight: 600;
+    flex: 1;
+    line-height: 1.5
+}
+
+.acc-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0
+}
+
+.lvl {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 700
+}
+
+.lvl.b {
+    background: rgba(127, 255, 90, .12);
+    color: var(--volt)
+}
+
+.lvl.i {
+    background: rgba(255, 184, 48, .12);
+    color: var(--amber)
+}
+
+.lvl.a {
+    background: rgba(255, 92, 122, .12);
+    color: var(--rose)
+}
+
+.acc-arr {
+    color: var(--fg3);
+    font-size: 11px;
+    transition: transform .2s;
+    margin-top: 3px
+}
+
+.acc-h.open .acc-arr {
+    transform: rotate(180deg)
+}
+
+.acc-body {
+    padding: 16px 18px;
+    background: var(--ink1);
+    border-top: 1px solid var(--rim);
+    font-size: 13px;
+    color: var(--fg2);
+    line-height: 1.7;
+    display: none
+}
+
+.acc-body.open {
+    display: block
+}
+
+.tabs-bar {
+    display: flex;
+    gap: 3px;
+    border-bottom: 1px solid var(--rim);
+    margin-bottom: 18px
+}
+
+.tab {
+    padding: 9px 18px;
+    border-radius: 7px 7px 0 0;
+    border: none;
+    background: none;
+    color: var(--fg2);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+    border-bottom: 2px solid transparent
+}
+
+.tab:hover {
+    color: var(--fg);
+    background: var(--ink2)
+}
+
+.tab.on {
+    color: var(--volt);
+    border-bottom-color: var(--volt)
+}
+
+.tab-pane {
+    display: none
+}
+
+.tab-pane.on {
+    display: block
+}
+
+/* ── ARCHITECTURE DISPLAY ── */
+.arch {
+    background: var(--ink1);
+    border: 1px solid var(--rim);
+    border-radius: var(--r);
+    padding: 24px;
+    margin: 16px 0
+}
+
+.arch-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--fg);
+    margin-bottom: 16px;
+    text-align: center
+}
+
+.layer-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px
+}
+
+.layer {
+    background: var(--ink3);
+    border: 1px solid var(--rim2);
+    border-radius: 8px;
+    padding: 10px 20px;
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+    position: relative;
+    transition: all .2s;
+    cursor: default
+}
+
+.layer:hover {
+    border-color: var(--volt);
+    background: var(--ink4)
+}
+
+.layer-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--fg)
+}
+
+.layer-detail {
+    font-size: 11px;
+    color: var(--fg3);
+    margin-top: 2px;
+    font-family: var(--mono)
+}
+
+.layer-shape {
+    font-size: 10px;
+    color: var(--amber);
+    font-family: var(--mono);
+    margin-top: 2px
+}
+
+.layer.inp {
+    border-color: var(--cyan);
+    background: rgba(56, 224, 240, .05)
+}
+
+.layer.inp .layer-name {
+    color: var(--cyan)
+}
+
+.layer.out {
+    border-color: var(--volt);
+    background: rgba(127, 255, 90, .05)
+}
+
+.layer.out .layer-name {
+    color: var(--volt)
+}
+
+.layer.mid {
+    border-color: var(--purple);
+    background: rgba(176, 111, 255, .05)
+}
+
+.layer.mid .layer-name {
+    color: var(--purple)
+}
+
+.layer.pool {
+    border-color: var(--amber);
+    background: rgba(255, 184, 48, .05)
+}
+
+.layer.pool .layer-name {
+    color: var(--amber)
+}
+
+.arch-arrow {
+    color: var(--fg3);
+    font-size: 20px;
+    line-height: 1;
+    align-self: center
+}
+
+/* ── GATE DIAGRAM ── */
+.lstm-gate {
+    background: var(--ink2);
+    border: 1px solid var(--rim);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 10px
+}
+
+.gate-name {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px
+}
+
+.gate-math {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--amber);
+    margin-bottom: 6px
+}
+
+.gate-desc {
+    font-size: 12.5px;
+    color: var(--fg2)
+}
+
+/* ── COMPARISON TABLE COLORS ── */
+.row-ann td:first-child {
+    color: var(--cyan)
+}
+
+.row-cnn td:first-child {
+    color: var(--volt)
+}
+
+.row-rnn td:first-child {
+    color: var(--amber)
+}
+
+.row-lstm td:first-child {
+    color: var(--purple)
+}
+
+.row-dt td:first-child {
+    color: var(--fg2)
+}
+
+.row-rf td:first-child {
+    color: var(--cyan)
+}
+
+.row-xgb td:first-child {
+    color: var(--rose)
+}
+
+/* ── CHECKPOINT ── */
+.checkpoint {
+    background: linear-gradient(135deg, rgba(127, 255, 90, .04), rgba(56, 224, 240, .04));
+    border: 1px solid var(--volt);
+    border-radius: var(--r);
+    padding: 18px 22px;
+    margin: 24px 0
+}
+
+.chk-h {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px
+}
+
+.chk-h h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--volt)
+}
+
+.chk-list {
+    list-style: none
+}
+
+.chk-list li {
+    font-size: 12.5px;
+    color: var(--fg2);
+    padding: 5px 0;
+    border-bottom: 1px solid var(--rim);
+    display: flex;
+    gap: 8px;
+    align-items: flex-start
+}
+
+.chk-list li:last-child {
+    border: none
+}
+
+.chk-list li::before {
+    content: '◆';
+    color: var(--volt);
+    flex-shrink: 0;
+    font-size: 9px;
+    margin-top: 4px
+}
+
+/* ── ROADMAP ── */
+.roadmap {
+    display: flex;
+    gap: 0;
+    margin: 20px 0;
+    overflow-x: auto;
+    padding-bottom: 8px
+}
+
+.rm-step {
+    flex: 1;
+    min-width: 180px;
+    background: var(--ink2);
+    border: 1px solid var(--rim);
+    padding: 18px 16px;
+    position: relative
+}
+
+.rm-step:first-child {
+    border-radius: var(--r) 0 0 var(--r)
+}
+
+.rm-step:last-child {
+    border-radius: 0 var(--r) var(--r) 0
+}
+
+.rm-step+.rm-step {
+    border-left: none
+}
+
+.rm-num {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    line-height: 1
+}
+
+.rm-model {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 4px
+}
+
+.rm-desc {
+    font-size: 11px;
+    color: var(--fg3);
+    line-height: 1.5
+}
+
+.rm-why {
+    font-size: 11px;
+    color: var(--fg2);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--rim)
+}
+
+/* ── MISC ── */
+h2 {
+    font-size: 20px;
+    font-weight: 800;
+    margin: 28px 0 12px;
+    letter-spacing: -.2px
+}
+
+h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 20px 0 8px
+}
+
+h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 14px 0 6px
+}
+
+p {
+    color: var(--fg2);
+    font-size: 13.5px;
+    margin-bottom: 10px
+}
+
+strong {
+    color: var(--fg);
+    font-weight: 700
+}
+
+.sec-div {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--rim), transparent);
+    margin: 32px 0
+}
+
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 8px 0
+}
+
+.tag {
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid
+}
+
+.tv {
+    border-color: var(--volt);
+    color: var(--volt);
+    background: rgba(127, 255, 90, .08)
+}
+
+.tc {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    background: rgba(56, 224, 240, .08)
+}
+
+.tp {
+    border-color: var(--purple);
+    color: var(--purple);
+    background: rgba(176, 111, 255, .08)
+}
+
+.ta {
+    border-color: var(--amber);
+    color: var(--amber);
+    background: rgba(255, 184, 48, .08)
+}
+
+.tr {
+    border-color: var(--rose);
+    color: var(--rose);
+    background: rgba(255, 92, 122, .08)
+}
+
+.breadcrumb {
+    font-size: 11px;
+    color: var(--fg3);
+    margin-bottom: 6px;
+    display: flex;
+    gap: 5px;
+    align-items: center
+}
+
+.breadcrumb span {
+    color: var(--fg2)
+}
+
+.hidden {
+    display: none !important
+}
+
+
+.code-block { position: relative; }
+.copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--rim3);
+    color: var(--fg);
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+.copy-btn:hover { opacity: 1; }
+
+</style></head><body><div class="shell"><!-- ══ SIDEBAR ══ --><nav class="rail" id="rail"><div class="rail-top"><div class="rail-brand"><div class="brand-icon">⚙</div><div class="brand-text">Bearing DL<br><em>ANN · CNN · RNN · LSTM</em></div></div><div class="prog-shell"><div class="prog-row"><span>Progress</span><span id="pct">0%</span></div><div class="prog-track"><div class="prog-bar" id="pbar" style="width:0%"></div></div></div></div><div class="rail-nav" id="rail-nav"><div class="nav-grp"><div class="nav-grp-lbl">Foundation</div><button class="nav-btn on" onclick="show('s0')" id="nb-s0"><span class="n-dot">0</span>DL Roadmap</button></div><div class="nav-grp"><div class="nav-grp-lbl">Implementation</div><button class="nav-btn" onclick="show('s1')" id="nb-s1"><span class="n-dot">1</span>ANN / MLP</button><button class="nav-btn" onclick="show('s2')" id="nb-s2"><span class="n-dot">2</span>CNN (1D)</button><button class="nav-btn" onclick="show('s3')" id="nb-s3"><span class="n-dot">3</span>RNN</button><button class="nav-btn" onclick="show('s4')" id="nb-s4"><span class="n-dot">4</span>LSTM</button></div><div class="nav-grp"><div class="nav-grp-lbl">Analysis</div><button class="nav-btn" onclick="show('s5')" id="nb-s5"><span class="n-dot">5</span>Model Comparison</button><button class="nav-btn" onclick="show('s6')" id="nb-s6"><span class="n-dot">6</span>Mentor Q&amp;
+A (30)</button><button class="nav-btn" onclick="show('s7')" id="nb-s7"><span class="n-dot">7</span>Research Directions</button></div></div></nav><!-- ══ MAIN ══ --><div class="main-wrap"><div class="topbar"><button class="tb-toggle" onclick="toggleRail()">☰</button><div class="tb-title" id="tb-title">Deep Learning Roadmap</div><span class="tb-pill pill-volt" onclick="markDone()">✓ Mark Done</span><span class="tb-pill pill-cyan" onclick="show('s6')">🎯 Mentor Q&amp;
+A</span></div><div class="content"><!-- ════════════════════════════════════════════════ S0 — ROADMAP ════════════════════════════════════════════════ --><section class="sec vis" id="s0"><div class="breadcrumb">Foundation <span>›</span>Start Here</div><div class="sec-eyebrow">Deep Learning Extension of Your Bearing Project</div><div class="sec-h">Your <span class="hi">DL Roadmap</span>— Why This Order</div><div class="sec-sub">You already have 96.67% with Random Forest. Now learn to build neural approaches to the same problem — and understand when and why each architecture applies.</div><div class="box info"><div class="box-ico">🎯</div><div class="box-body"><div class="box-title">Your Starting Advantage</div><div class="box-text">You know feature engineering,
+cross-validation,
+confusion matrices,
+and bias-variance tradeoff. This section builds exclusively on that knowledge — every new DL concept is anchored to something you already understand.</div></div></div><h2>The Four-Stage Learning Path</h2><div class="roadmap"><div class="rm-step"><div class="rm-num" style="color:var(--cyan)">01</div><div class="rm-model" style="color:var(--cyan)">ANN / MLP</div><div class="rm-desc">Structured features → neural layers</div><div class="rm-why">Uses your <code>bearing_features_phase3.csv</code>directly. Bridge from sklearn to Keras. Same 9 features you already know.</div></div><div class="rm-step"><div class="rm-num" style="color:var(--volt)">02</div><div class="rm-model" style="color:var(--volt)">1D CNN</div><div class="rm-desc">Raw vibration → learned features</div><div class="rm-why">Skip feature engineering entirely. CNN learns kurtosis-like patterns automatically from the raw 15,
+625-point signal.</div></div><div class="rm-step"><div class="rm-num" style="color:var(--amber)">03</div><div class="rm-model" style="color:var(--amber)">RNN</div><div class="rm-desc">Sequential modeling with memory</div><div class="rm-why">Treats vibration as a time sequence. Each sample depends on previous. Introduces hidden state concept.</div></div><div class="rm-step"><div class="rm-num" style="color:var(--purple)">04</div><div class="rm-model" style="color:var(--purple)">LSTM</div><div class="rm-desc">Long-range temporal memory</div><div class="rm-why">Fixes RNN's vanishing gradient. Captures long-range periodic fault patterns (like IR spikes every N samples).</div>
+ </div></div><h2>Why This Exact Order?</h2><div class="g2"><div class="card cyan"><div class="card-h">ANN First — Minimal New Concepts</div><p>Your Random Forest takes a feature vector and classifies it. An ANN does the same thing — just with learned linear combinations and non-linear activations instead of decision tree splits. The input (<code>bearing_features_phase3.csv</code>) is identical. You only need to learn: Dense layers,
+ReLU,
+Softmax,
+Adam,
+categorical cross-entropy. That's 5 new concepts, not 50.</p>
+ <div class="tags"><span class="tag tc">Same features</span><span class="tag tc">Same data</span><span class="tag tc">Keras pipeline</span></div></div><div class="card volt"><div class="card-h">CNN Second — Feature Learning Revolution</div><p>ANN taught you that neural networks can classify. CNN raises the question: <em>do you even need to engineer features?</em>A 1D CNN slides a filter over the raw 15,
+625-sample vibration signal and automatically learns what kurtosis,
+envelope peak,
+and peak-to-peak represent — without you writing a single feature formula.</p><div class="tags"><span class="tag tv">Raw signal</span><span class="tag tv">Auto features</span><span class="tag tv">Convolution</span></div></div><div class="card amber"><div class="card-h">RNN Third — Temporal Dependency</div><p>CNN treats the signal as a spatial pattern (slide filter left-right). RNN treats it as a <em>sequence</em>— sample at time t depends on samples at t-1,
+t-2... This matters for vibration: IR fault creates a spike every N samples (periodically),
+and RNN can learn to track "I saw a spike 120 samples ago." Introduces: hidden state,
+unrolling,
+BPTT.</p><div class="tags"><span class="tag ta">Sequence</span><span class="tag ta">Memory</span><span class="tag ta">BPTT</span></div></div><div class="card purple"><div class="card-h">LSTM Last — Solving RNN's Problem</div>
+ <p>RNN forgets long-range dependencies (vanishing gradient). Your bearing signal is 1 second=15,
+625 samples. An IR fault spike appears every~93 samples (at 1000 RPM). RNN loses memory of that spike by the time it sees the next one. LSTM's cell state remembers it. Understand gates before applying them.</p>
+ <div class="tags"><span class="tag tp">Gates</span><span class="tag tp">Cell state</span><span class="tag tp">Long memory</span></div></div></div><div class="sec-div"></div><h2>What Each Architecture "Sees" </h2><div class="tbl-wrap"><table><tr><th>Model</th><th>Input</th><th>Feature Source</th><th>What It Learns</th><th>Your Bearing Analogy</th></tr><tr><td style="color:var(--cyan)"><strong>ANN</strong></td><td>9 engineered features</td><td>You (Phase 3)</td><td>Decision boundary in 9D space</td><td>Like RF but smooth boundaries</td></tr><tr><td style="color:var(--volt)"><strong>CNN</strong></td><td>Raw 15,
+625-point signal</td><td>Automatic</td><td>Local patterns (spike shapes)</td><td>Learns kurtosis-like features by itself</td></tr><tr><td style="color:var(--amber)"><strong>RNN</strong></td><td>Signal as time sequence</td><td>Automatic+temporal</td><td>Short-range patterns+memory</td><td>Tracks "spike happened N steps ago" </td></tr><tr><td style="color:var(--purple)"><strong>LSTM</strong></td><td>Signal as time sequence</td><td>Automatic+long-term</td><td>Long-range periodicity</td><td>Remembers IR spike period (93 samples)</td></tr></table></div><div class="box warn"><div class="box-ico">⚠️</div><div class="box-body"><div class="box-title">Data Reality Check</div><div class="box-text">Your dataset has 300 recordings. ANN will work well (like RF). CNN on raw signals needs more data — consider data augmentation or use windowed segments (e.g., 256-sample windows → ~18, 000 samples). RNN/LSTM are shown for educational purposes;
+
+with 300 samples they will likely overfit. This is expected and the lesson itself.</div></div></div><div class="checkpoint"><div class="chk-h"><span style="font-size:18px">✅</span><h3>Before Moving On — Section 0</h3></div><ul class="chk-list"><li>Can you explain why ANN should be learned before CNN?</li><li>Can you articulate the difference between feature engineering (Phase 3) and feature learning (CNN)?</li><li>Do you understand why sequence modeling (RNN/LSTM) is conceptually different from pattern matching (CNN)?</li><li>Can you explain why 300 samples is a challenge for deep learning and what you can do about it?</li></ul></div></section><!-- ════════════════════════════════════════════════ S1 — ANN / MLP ════════════════════════════════════════════════ --><section class="sec" id="s1"><div class="breadcrumb">Implementation <span>›</span>Part 1</div><div class="sec-eyebrow">Task 2 — ANN / MLP Implementation</div><div class="sec-h"><span class="hi">ANN / MLP</span>on Bearing Features</div><div class="sec-sub">Input: bearing_features_phase3.csv — the same 9 features from Phase 3. Build,
+train,
+and evaluate a multi-layer perceptron for 4-class fault classification.</div><h2>Architecture Overview</h2><div class="arch"><div class="arch-title">ANN Architecture — Bearing Fault (9 → 64 → 32 → 4)</div><div class="layer-stack"><div class="layer inp"><div class="layer-name">Input Layer</div><div class="layer-detail">9 features: mean,
+std,
+variance,
+rms,
+peak,
+peak_to_peak,
+crest_factor,
+kurtosis,
+skewness</div><div class="layer-shape">Shape: (batch_size, 9)</div></div><div class="arch-arrow">↓</div><div class="layer mid"><div class="layer-name">Dense Layer 1</div><div class="layer-detail">64 neurons · ReLU activation · z=W₁·x+b₁</div><div class="layer-shape">Shape: (batch_size, 64) · Params: 9×64+64=640</div></div><div class="arch-arrow">↓</div><div class="layer mid"><div class="layer-name">Dropout (0.3)</div><div class="layer-detail">30% neurons randomly zeroed during training → prevents overfitting</div><div class="layer-shape">Shape: (batch_size, 64) · No params</div></div><div class="arch-arrow">↓</div><div class="layer mid"><div class="layer-name">Dense Layer 2</div><div class="layer-detail">32 neurons · ReLU activation · z=W₂·A₁+b₂</div><div class="layer-shape">Shape: (batch_size, 32) · Params: 64×32+32=2,
+080</div></div><div class="arch-arrow">↓</div><div class="layer out"><div class="layer-name">Output Layer</div><div class="layer-detail">4 neurons · Softmax · P(OK),
+P(IR),
+P(OR),
+P(RE)</div><div class="layer-shape">Shape: (batch_size, 4) · Params: 32×4+4=132 · Total: 2,
+852</div></div></div></div><h2>Key Concepts — Before the Code</h2><div class="g2"><div class="card volt"><div class="card-h">StandardScaler — Why First</div><p>Your kurtosis ranges 0.25 → 172. Your mean ranges −0.003 →+0.001. Without scaling,
+kurtosis dominates every weight update. Gradient descent steps are proportional to feature magnitude. StandardScaler normalizes each feature to mean=0,
+std=1 — all features contribute equally.</p><div class="math">x_scaled=(x − μ_train) / σ_train<br><br><span class="vv">CRITICAL</span>: Fit scaler on <span class="vc">train only</span>. Transform test with same scaler.<br>Never fit on test — this is data leakage.</div></div><div class="card cyan"><div class="card-h">Label Encoding → One-Hot</div><p>Your fault column: ['OK',
+'IR',
+'OR',
+'RE']. Neural networks need numbers. Two steps: (1) LabelEncoder → [0,
+1,
+2,
+3]. (2) to_categorical → one-hot vectors. IR=[0,
+1,
+0,
+0]. This pairs with Softmax+Categorical Cross-Entropy.</p><div class="math">OK → [1,
+0,
+0,
+0]<br>IR → [0,
+1,
+0,
+0]<br>OR → [0,
+0,
+1,
+0]<br>RE → [0,
+0,
+0,
+1]<br><br>Loss=−Σ yᵢ · log(ŷᵢ) → only correct class term survives</div></div></div><h2>Complete ANN Code — Line by Line</h2><div class="code-block">
+<button class="copy-btn" onclick="copyCode(this)">Copy Code</button><span class="cb-label">Python — ANN on Bearing Features</span><pre>
+<span class="c"># ══════════════════════════════════════════════════════════════════ # BEARING FAULT DIAGNOSIS — ANN / MLP # Input: bearing_features_phase3.csv (300 rows × 9 features + 1 label) # Output: 4-
+class fault classifier (OK, IR, OR, RE) # ══════════════════════════════════════════════════════════════════</span> <span class="k">import</span> numpy <span class="k">as</span> np <span class="k">import</span> pandas <span class="k">as</span> pd <span class="k">import</span> matplotlib.pyplot <span class="k">as</span> plt <span class="k">from</span> sklearn.model_selection <span class="k">import</span> train_test_split <span class="k">from</span> sklearn.preprocessing <span class="k">import</span> StandardScaler,
+LabelEncoder <span class="k">from</span> sklearn.metrics <span class="k">import</span> classification_report,
+confusion_matrix <span class="k">import</span> tensorflow <span class="k">as</span> tf <span class="k">from</span> tensorflow.keras.models <span class="k">import</span> Sequential <span class="k">from</span> tensorflow.keras.layers <span class="k">import</span> Dense,
+Dropout <span class="k">from</span> tensorflow.keras.utils <span class="k">import</span> to_categorical <span class="k">from</span> tensorflow.keras.callbacks <span class="k">import</span> EarlyStopping <span class="k">import</span> seaborn <span class="k">as</span> sns 
+<span class="c"># ── STEP 1: LOAD DATA ─────────────────────────────────────────────</span> df=pd.read_csv(<span class="s" >'bearing_features_phase3.csv' </span>) 
+<span class="c"># Feature columns — same 9 features 
+from your Phase 3</span> feature_cols=[<span class="s">'mean' </span>,
+<span class="s">'std' </span>,
+<span class="s">'variance' </span>,
+<span class="s">'rms' </span>,
+<span class="s">'peak' </span>,
+<span class="s">'peak_to_peak' </span>,
+<span class="s">'crest_factor' </span>,
+<span class="s">'kurtosis' </span>,
+<span class="s">'skewness' </span>] X=df[feature_cols].values 
+<span class="c"># shape: (300, 9)</span> y_raw=df[<span class="s">'fault' </span>].values 
+<span class="c"># ['OK',
+'IR',
+'OR',
+'RE',
+...]</span> <span class="k">print</span>(f <span class="s" >"Dataset shape: {X.shape}" </span>) 
+<span class="c"># (300, 9)</span> <span class="k">print</span>(f <span class="s" >"Classes: {np.unique(y_raw)}" </span>) 
+<span class="c"># ['IR' 'OK' 'OR' 'RE']</span> <span class="k">print</span>(df[<span class="s" >'fault' </span>].value_counts()) 
+<span class="c">#~75 per class</span> 
+<span class="c"># ── STEP 2: LABEL ENCODING ────────────────────────────────────────</span> 
+<span class="c"># Convert string labels to integers: IR→1,
+OK→0,
+OR→2,
+RE→3</span> le=LabelEncoder() y_int=le.fit_transform(y_raw) 
+<span class="c"># [0,
+1,
+2,
+3,
+...]</span> <span class="k">print</span>(f <span class="s" >"Class mapping: {dict(zip(le.classes_, le.transform(le.classes_)))}" </span>) 
+<span class="c"># {
+    'IR': 0, 'OK':1, 'OR':2, 'RE':3
+}
+
+— alphabetical order</span> n_classes=len(le.classes_) 
+<span class="c"># 4</span> 
+<span class="c"># One-hot encode: [0,
+1,
+2,
+3] → [[1,
+0,
+0,
+0],
+[0,
+1,
+0,
+0],
+...]</span> 
+<span class="c"># Required 
+for Softmax+Categorical Cross-Entropy</span> y_onehot=to_categorical(y_int, num_classes=n_classes) <span class="k">print</span>(f <span class="s" >"One-hot shape: {y_onehot.shape}" </span>) 
+<span class="c"># (300, 4)</span> 
+<span class="c"># ── STEP 3: TRAIN-TEST SPLIT ──────────────────────────────────────</span> 
+<span class="c"># 80/20 split,
+stratified to maintain 
+class distribution</span> X_train,
+X_test,
+y_train,
+y_test=train_test_split(X, y_onehot,
+    test_size=<span class="n" >0.2</span>,
+    random_state=<span class="n" >42</span>,
+    stratify=y_int <span class="c" ># stratify on integer labels, not one-hot</span>) <span class="k">print</span>(f <span class="s" >"Train: {X_train.shape}, Test: {X_test.shape}" </span>) 
+<span class="c"># Train: (240, 9) Test: (60, 9)</span> 
+<span class="c"># ── STEP 4: STANDARDSCALER ────────────────────────────────────────</span> 
+<span class="c"># FIT only on training data — then TRANSFORM both train and test</span> 
+<span class="c"># If you fit on all 300 rows: data leakage (test stats contaminate model)</span> scaler=StandardScaler() X_train_scaled=scaler.fit_transform(X_train) 
+<span class="c"># fit+transform train</span> X_test_scaled=scaler.transform(X_test) 
+<span class="c"># transform only — no fit !</span> 
+<span class="c"># After scaling: mean≈0,
+std≈1 
+for each of the 9 features</span> 
+<span class="c"># Kurtosis: was 0.25–172,
+now roughly -1 to+3 (z-score)</span> 
+<span class="c"># ── STEP 5: BUILD THE ANN ─────────────────────────────────────────</span> tf.random.set_seed(<span class="n" >42</span>) 
+<span class="c"># reproducibility</span> model=Sequential([ <span class="c" ># Input shape: (9, ) — 9 features per bearing</span> Dense(<span class="n" >64</span>, activation=<span class="s" >'relu' </span>, input_shape=(<span class="n" >9</span>, ),
+        name=<span class="s" >'hidden_1' </span>),
+    <span class="c" ># → output: (batch, 64). Each of 64 neurons: z=W₁x+b₁, a=ReLU(z)</span> <span class="c" ># Why 64? Start with 2-4× input size. Tune via validation loss.</span> Dropout(<span class="n" >0.3</span>, name=<span class="s" >'dropout_1' </span>),
+    <span class="c" ># 30% of neurons randomly zeroed in each forward pass (training only)</span> <span class="c" ># Forces redundant representations → prevents memorizing 240 samples</span> Dense(<span class="n" >32</span>, activation=<span class="s" >'relu' </span>, name=<span class="s" >'hidden_2' </span>),
+    <span class="c" ># → output: (batch, 32). Compresses 64→32 features further.</span> Dropout(<span class="n" >0.2</span>, name=<span class="s" >'dropout_2' </span>),
+
+    Dense(<span class="n" >4</span>, activation=<span class="s" >'softmax' </span>, name=<span class="s" >'output' </span>),
+    <span class="c" ># → output: (batch, 4). 4 probabilities summing to 1.0</span> <span class="c" ># Softmax: ŷᵢ=e^zᵢ / Σe^zⱼ → [P(IR), P(OK), P(OR), P(RE)]</span>]) 
+model.summary() 
+<span class="c"># Total trainable params:~2,
+852 — tiny ! RF had much more complexity.</span> 
+<span class="c"># ── STEP 6: COMPILE ───────────────────────────────────────────────</span> 
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=<span class="n" >0.001</span>),
+    <span class="c" ># Adam: adaptive learning rate per parameter. Best default optimizer.</span> <span class="c" ># lr=0.001 is the standard starting point 
+for Adam.</span> loss=<span class="s" >'categorical_crossentropy' </span>,
+    <span class="c" ># Categorical CE 
+for multi-
+class one-hot targets.</span> <span class="c" ># L=−Σ yᵢ·log(ŷᵢ) — only the true 
+class term survives.</span> metrics=[<span class="s" >'accuracy' </span>]) 
+<span class="c"># ── STEP 7: CALLBACKS ─────────────────────────────────────────────</span> early_stop=EarlyStopping(monitor=<span class="s" >'val_loss' </span>, <span class="c" ># watch validation loss</span> patience=<span class="n" >20</span>, <span class="c" ># stop 
+if no improvement 
+for 20 epochs</span> restore_best_weights=<span class="k" >True</span>, <span class="c" ># revert to best epoch's weights</span>
+ verbose=<span class="n" >1</span>) 
+<span class="c"># Equivalent to your cross-validation: prevents overfitting on 240 samples</span> 
+<span class="c"># ── STEP 8: TRAIN ─────────────────────────────────────────────────</span> history=
+model.fit(X_train_scaled, y_train,
+    epochs=<span class="n" >200</span>, <span class="c" ># maximum 200 epochs (early stopping will cut this)</span> batch_size=<span class="n" >32</span>, <span class="c" ># process 32 samples, then update weights once</span> <span class="c" ># 240 samples / 32 batch=7.5 → 8 iterations per epoch</span> validation_split=<span class="n" >0.2</span>, <span class="c" ># hold out 20% of train 
+for val (48 samples)</span> callbacks=[early_stop],
+    verbose=<span class="n" >1</span>) 
+<span class="c"># ── STEP 9: EVALUATE ──────────────────────────────────────────────</span> test_loss,
+test_acc=
+model.evaluate(X_test_scaled, y_test, verbose=<span class="n" >0</span>) <span class="k">print</span>(f <span class="s" >"Test Accuracy: {test_acc:.4f} ({test_acc*100:.2f}%)" </span>) 
+<span class="c"># Predictions</span> y_pred_prob=model.predict(X_test_scaled) 
+<span class="c"># shape: (60, 4)</span> y_pred_int=np.argmax(y_pred_prob, axis=<span class="n" >1</span>) 
+<span class="c"># index of max probability</span> y_true_int=np.argmax(y_test, axis=<span class="n" >1</span>) 
+<span class="c"># recover integer 
+from one-hot</span> <span class="k">print</span>(classification_report(y_true_int, y_pred_int,
+        target_names=le.classes_)) 
+<span class="c"># Shows precision,
+recall,
+F1 
+for each 
+class — like your Phase 4</span> 
+<span class="c"># ── STEP 10: TRAINING CURVES ──────────────────────────────────────</span> fig,
+(ax1, ax2)=plt.subplots(<span class="n" >1</span>, <span class="n" >2</span>, figsize=(<span class="n" >12</span>, <span class="n" >4</span>)) ax1.plot(history.history[<span class="s" >'accuracy' </span>], label=<span class="s" >'Train Acc' </span>, color=<span class="s" >'#7fff5a' </span>) ax1.plot(history.history[<span class="s" >'val_accuracy' </span>], label=<span class="s" >'Val Acc' </span>, color=<span class="s" >'#38e0f0' </span>) ax1.set_title(<span class="s" >'Accuracy over Epochs' </span>);
+ax1.legend();
+ax1.set_ylim(<span class="n" >0</span>, <span class="n" >1</span>) ax2.plot(history.history[<span class="s" >'loss' </span>], label=<span class="s" >'Train Loss' </span>, color=<span class="s" >'#ffb830' </span>) ax2.plot(history.history[<span class="s" >'val_loss' </span>], label=<span class="s" >'Val Loss' </span>, color=<span class="s" >'#ff5c7a' </span>) ax2.set_title(<span class="s" >'Loss over Epochs' </span>);
+ax2.legend() plt.tight_layout();
+plt.show() 
+<span class="c"># ── STEP 11: CONFUSION MATRIX ─────────────────────────────────────</span> cm=confusion_matrix(y_true_int, y_pred_int) plt.figure(figsize=(<span class="n" >6</span>, <span class="n" >5</span>)) sns.heatmap(cm, annot=<span class="k" >True</span>, fmt=<span class="s" >'d' </span>, cmap=<span class="s" >'Blues' </span>,
+    xticklabels=le.classes_, yticklabels=le.classes_) plt.title(<span class="s" >'ANN Confusion Matrix — Bearing Fault' </span>) plt.ylabel(<span class="s" >'True Label' </span>);
+plt.xlabel(<span class="s" >'Predicted' </span>) plt.tight_layout();
+plt.show()</pre></div><h2>Mathematical Intuition</h2><div class="g2"><div><h3>Forward Pass for One Sample</h3><div class="math">Input: x=[RMS,
+Kurtosis,
+Peak,
+...,
+Skewness] shape:(9, )<br><br>Layer 1: z₁=W₁·x+b₁ <span class="vc">W₁ shape: (64, 9)</span><br>a₁=ReLU(z₁) <span class="vv">shape: (64, )</span><br><br>Layer 2: z₂=W₂·a₁+b₂ <span class="vc">W₂ shape: (32, 64)</span><br>a₂=ReLU(z₂) <span class="vv">shape: (32, )</span><br><br>Output: z₃=W₃·a₂+b₃ <span class="vc">W₃ shape: (4, 32)</span><br>ŷ=Softmax(z₃) <span class="va">shape: (4, )</span><br><br>Loss: L=−Σ yᵢ·log(ŷᵢ) → only IR term survives if true=IR</div></div><div><h3>Adam Optimizer vs SGD</h3><div class="math">SGD: w=w − η·∂L/∂w <span class="c">(same lr for everything)</span><br><br>Adam: mₜ=β₁·mₜ₋₁+(1−β₁)·gₜ <span class="c">(momentum)</span><br>vₜ=β₂·vₜ₋₁+(1−β₂)·gₜ² <span class="c">(velocity)</span><br>m̂ₜ=mₜ/(1−β₁ᵗ) v̂ₜ=vₜ/(1−β₂ᵗ)<br>w=w − η·m̂ₜ/√(v̂ₜ+ε)<br><br>Defaults: β₁=0.9,
+β₂=0.999,
+ε=1e-8<br>Benefit: lr adapts per weight → faster convergence</div></div></div><div class="box note"><div class="box-ico">🧠</div><div class="box-body"><div class="box-title">Why ANN Won't Beat Your Random Forest (Probably)</div>
+ <div class="box-text">With 240 training samples and 9 features,
+Random Forest wins. ANN has 2,
+852 parameters — that's 12× the training data count. It will overfit unless heavily regularized. The lesson: ANN shines when data is large and features are raw/unstructured. With your carefully engineered features, RF' s tree-based splits are more data-efficient.</div></div></div><div class="checkpoint"><div class="chk-h"><span style="font-size:18px">✅</span><h3>ANN Checkpoint</h3></div><ul class="chk-list"><li>Can you explain why StandardScaler must be fit on train only?</li><li>Can you explain why we one-hot encode labels for Softmax+Categorical CE?</li><li>Do you understand what Dropout does and why it prevents overfitting?</li><li>Can you compute the parameter count for a Dense(64) → Dense(32) → Dense(4) network with input=9?</li><li>Can you explain what EarlyStopping's patience=20 means in practice?</li>
+ </ul></div></section><!-- ════════════════════════════════════════════════ S2 — CNN ════════════════════════════════════════════════ --><section class="sec" id="s2"><div class="breadcrumb">Implementation <span>›</span>Part 2</div><div class="sec-eyebrow">Task 3 — 1D CNN on Raw Vibration Signal</div><div class="sec-h">1D <span class="hi">CNN</span>— Feature Learning from Raw Signal</div><div class="sec-sub">Skip Phase 3 entirely. Feed the raw 15,
+625-sample vibration signal directly. Let the CNN learn its own kurtosis,
+envelope,
+and frequency features.</div><h2>Feature Engineering vs Feature Learning</h2><div class="g2"><div class="card amber"><div class="card-h">Your Phase 3 — Feature Engineering</div><p>You computed kurtosis=Σ(xᵢ-μ)⁴/(nσ⁴)-3 explicitly. You knew from bearing physics that this captures IR fault spikes. You computed 9 statistics,
+ranked them by F-ratio,
+then added 5 envelope features. Total:~5 phases of manual work.</p><div class="tags"><span class="tag ta">Domain knowledge</span><span class="tag ta">Interpretable</span><span class="tag ta">Data efficient</span></div></div><div class="card volt"><div class="card-h">CNN — Feature Learning</div><p>The CNN slides a small window (kernel) over the raw signal. Each kernel learns a pattern — one might learn "sharp spike"(≈ kurtosis),
+another learns "periodic impact spacing"(≈ envelope). No physics knowledge required. Given enough data.</p><div class="tags"><span class="tag tv">Automatic</span><span class="tag tv">Needs data</span><span class="tag tv">Black box</span></div></div></div><h2>How 1D Convolution Works on Vibration</h2><div class="box info"><div class="box-ico">💡</div><div class="box-body"><div class="box-title">Convolution Intuition</div><div class="box-text">Imagine a 16-point sliding window moving along your 15,
+625-sample vibration signal. At each position,
+it computes a dot product with a learned weight vector (kernel). If the signal matches the kernel pattern → high output. If not → near zero. After training,
+some kernels look like "spike detectors"(learning what you computed as kurtosis manually).</div></div></div><div class="math" style="margin:16px 0">Output at position t: <span class="va">y[t]=Σₖ x[t+k]·w[k]+b</span>for k=0..K-1<br><br>Signal: x has shape <span class="vc">(15625, 1)</span><br>Kernel: w has shape <span class="vc">(kernel_size, 1, n_filters)</span><br>Output: shape <span class="vc">(15625 - kernel_size + 1, n_filters)</span><br><br>After MaxPool(2): output length halved → <span class="vv">compresses signal</span></div><h2>Architecture — Input to Output</h2><div class="arch"><div class="arch-title">1D CNN Architecture — Raw Bearing Signal</div><div class="layer-stack"><div class="layer inp"><div class="layer-name">Input</div><div class="layer-detail">Raw vibration signal — 15,
+625 samples</div><div class="layer-shape">Shape: (batch, 15625, 1)</div></div><div class="arch-arrow">↓</div><div class="layer mid"><div class="layer-name">Conv1D — 32 filters,
+kernel=64</div><div class="layer-detail">32 kernels each 64 samples wide · Learns local patterns (spike shapes, periodicities)</div><div class="layer-shape">Shape: (batch, 15562, 32) · Params: 64×1×32+32=2,
+080</div></div><div class="arch-arrow">↓ ReLU ↓</div><div class="layer pool"><div class="layer-name">MaxPooling1D — pool=4</div><div class="layer-detail">Keep maximum in each 4-sample window → translational invariance</div><div class="layer-shape">Shape: (batch, 3890, 32)</div></div><div class="arch-arrow">↓</div><div class="layer mid"><div class="layer-name">Conv1D — 64 filters,
+kernel=32</div><div class="layer-detail">64 filters learn higher-level patterns (combining spike detector outputs)</div><div class="layer-shape">Shape: (batch, 3859, 64) · Params: 32×32×64+64=65,
+600</div></div><div class="arch-arrow">↓ ReLU ↓</div><div class="layer pool"><div class="layer-name">MaxPooling1D — pool=4</div><div class="layer-shape">Shape: (batch, 964, 64)</div></div><div class="arch-arrow">↓</div><div class="layer mid"><div class="layer-name">Conv1D — 128 filters,
+kernel=16</div><div class="layer-shape">Shape: (batch, 949, 128) · Learns fault-class-specific patterns</div></div><div class="arch-arrow">↓ ReLU ↓</div><div class="layer pool"><div class="layer-name">GlobalAveragePooling1D</div><div class="layer-detail">Average across entire time axis → removes temporal dimension</div><div class="layer-shape">Shape: (batch, 128) — compressed representation</div></div><div class="arch-arrow">↓</div><div class="layer mid"><div class="layer-name">Dense 64 · Dropout 0.3</div><div class="layer-shape">Shape: (batch, 64)</div></div><div class="arch-arrow">↓</div><div class="layer out"><div class="layer-name">Dense 4 · Softmax</div><div class="layer-detail">4 fault probabilities</div><div class="layer-shape">Shape: (batch, 4)</div></div></div></div><h2>Complete 1D CNN Code — With Shape Annotations</h2><div class="code-block">
+<button class="copy-btn" onclick="copyCode(this)">Copy Code</button><span class="cb-label">Python — 1D CNN on Raw Vibration Signal</span><pre>
+<span class="c"># ══════════════════════════════════════════════════════════════════ # 1D CNN FOR BEARING FAULT DIAGNOSIS # Input: raw vibration signals,
+shape (N_recordings, 15625) # Data augmentation: windowing to create more samples # ══════════════════════════════════════════════════════════════════</span> <span class="k">import</span> numpy <span class="k">as</span> np <span class="k">import</span> pandas <span class="k">as</span> pd <span class="k">from</span> sklearn.model_selection <span class="k">import</span> train_test_split <span class="k">from</span> sklearn.preprocessing <span class="k">import</span> LabelEncoder <span class="k">import</span> tensorflow <span class="k">as</span> tf <span class="k">from</span> tensorflow.keras.models <span class="k">import</span> Sequential <span class="k">from</span> tensorflow.keras.layers <span class="k">import</span>(Conv1D, MaxPooling1D, GlobalAveragePooling1D,
+    Dense, Dropout, BatchNormalization) <span class="k">from</span> tensorflow.keras.utils <span class="k">import</span> to_categorical <span class="k">from</span> tensorflow.keras.callbacks <span class="k">import</span> EarlyStopping,
+ReduceLROnPlateau 
+<span class="c"># ── STEP 1: LOAD RAW SIGNALS ──────────────────────────────────────</span> 
+<span class="c"># Assume df has columns: Data_No (1-300),
+Acceleration,
+Fault</span> df_raw=pd.read_csv(<span class="s" >'data.csv' </span>) 
+<span class="c"># the original 4.6M row file</span> fs=<span class="n">15625</span> 
+<span class="c"># sampling frequency</span> signals,
+labels=[],
+[] <span class="k">for</span> data_no <span class="k">in</span> df_raw[<span class="s">'Data_No' </span>].unique(): segment=df_raw[df_raw[<span class="s">'Data_No' </span>]==data_no] sig=segment[<span class="s">'Acceleration' </span>].values 
+<span class="c"># shape: (15625, )</span> fault=segment[<span class="s">'fault' </span>].iloc[<span class="n">0</span>] signals.append(sig) labels.append(fault) X_raw=np.array(signals) 
+<span class="c"># shape: (300, 15625)</span> y_raw=np.array(labels) 
+<span class="c"># ── STEP 2: WINDOWING — DATA AUGMENTATION ─────────────────────────</span> 
+<span class="c"># Problem: 300 samples → too few 
+for CNN</span> 
+<span class="c"># Solution: slide a 1024-sample window with 50% overlap</span> 
+<span class="c"># 300 recordings ×~29 windows=~8700 samples !</span> window_size=<span class="n">1024</span> hop_size=<span class="n">512</span> 
+<span class="c"># 50% overlap</span> X_wins,
+y_wins=[],
+[] <span class="k">for</span> i,
+(sig, label) <span class="k">in</span> enumerate(zip(X_raw, y_raw)): <span class="k">for</span> start <span class="k">in</span> range(<span class="n" >0</span>, len(sig) - window_size + <span class="n" >1</span>, hop_size): window=sig[start : start+window_size] 
+<span class="c"># Normalize each window to zero mean,
+unit variance</span> window=(window - window.mean()) / (window.std() + <span class="n" >1e-8</span>) X_wins.append(window) y_wins.append(label) X_wins=np.array(X_wins) 
+<span class="c"># shape: (~8700, 1024)</span> y_wins=np.array(y_wins) <span class="k">print</span>(f <span class="s" >"After windowing: {X_wins.shape}" </span>) 
+<span class="c"># ── STEP 3: ENCODE & SPLIT ────────────────────────────────────────</span> le=LabelEncoder() y_int=le.fit_transform(y_wins) y_onehot=to_categorical(y_int, num_classes=<span class="n" >4</span>) 
+<span class="c"># Reshape 
+for Conv1D: (N, window_size, 1) — the '1' is channels</span> 
+<span class="c"># Like a grayscale image has 1 channel;
+vibration has 1 signal</span> X_wins=X_wins.reshape(-<span class="n" >1</span>, window_size, <span class="n" >1</span>) 
+<span class="c"># (N, 1024, 1)</span> X_train,
+X_test,
+y_train,
+y_test=train_test_split(X_wins, y_onehot, test_size=<span class="n" >0.2</span>, random_state=<span class="n" >42</span>, stratify=y_int) <span class="k">print</span>(f <span class="s" >"Train: {X_train.shape}, Test: {X_test.shape}" </span>) 
+<span class="c"># Train: (~6960, 1024, 1) Test: (~1740, 1024, 1)</span> 
+<span class="c"># ── STEP 4: BUILD 1D CNN ──────────────────────────────────────────</span> <span class="k">def</span> <span class="f">build_cnn_1d</span>(input_shape=(<span class="n" >1024</span>, <span class="n" >1</span>), n_classes=<span class="n" >4</span>): model=Sequential([ <span class="c" ># ── CONV BLOCK 1 ──────────────────────────────────────────</span> Conv1D(filters=<span class="n" >32</span>, kernel_size=<span class="n" >64</span>, activation=<span class="s" >'relu' </span>,
+        padding=<span class="s" >'same' </span>, input_shape=input_shape, name=<span class="s" >'conv1' </span>),
+    <span class="c" ># Input: (batch, 1024, 1)</span> <span class="c" ># Output: (batch, 1024, 32) — padding='same' keeps length</span> <span class="c" ># Kernel: (64, 1, 32) — 64-sample window × 1 channel × 32 filters</span> <span class="c" ># Each of 32 filters learns a DIFFERENT 64-sample pattern</span> BatchNormalization(), <span class="c" ># normalize activations → stable training</span> MaxPooling1D(pool_size=<span class="n" >4</span>, name=<span class="s" >'pool1' </span>),
+    <span class="c" ># Output: (batch, 256, 32) — keeps highest activation per 4 samples</span> <span class="c" ># MaxPool: 
+if spike was at position 100 or 101, both detected ✓</span> <span class="c" ># ── CONV BLOCK 2 ──────────────────────────────────────────</span> Conv1D(<span class="n" >64</span>, kernel_size=<span class="n" >32</span>, activation=<span class="s" >'relu' </span>,
+        padding=<span class="s" >'same' </span>, name=<span class="s" >'conv2' </span>),
+    <span class="c" ># Output: (batch, 256, 64) — learns combinations of Block 1 patterns</span> BatchNormalization(),
+    MaxPooling1D(<span class="n" >4</span>, name=<span class="s" >'pool2' </span>),
+    <span class="c" ># Output: (batch, 64, 64)</span> <span class="c" ># ── CONV BLOCK 3 ──────────────────────────────────────────</span> Conv1D(<span class="n" >128</span>, kernel_size=<span class="n" >16</span>, activation=<span class="s" >'relu' </span>,
+        padding=<span class="s" >'same' </span>, name=<span class="s" >'conv3' </span>),
+    <span class="c" ># Output: (batch, 64, 128)</span> BatchNormalization(),
+    GlobalAveragePooling1D(name=<span class="s" >'gap' </span>),
+    <span class="c" ># Average across ALL 64 time positions → (batch, 128)</span> <span class="c" ># Better than Flatten (which is position-sensitive)</span> <span class="c" ># ── CLASSIFIER HEAD ───────────────────────────────────────</span> Dense(<span class="n" >64</span>, activation=<span class="s" >'relu' </span>, name=<span class="s" >'dense1' </span>),
+    Dropout(<span class="n" >0.3</span>),
+    Dense(n_classes, activation=<span class="s" >'softmax' </span>, name=<span class="s" >'output' </span>),
+    ], name=<span class="s" >'cnn_1d_bearing' </span>) <span class="k">return</span> model cnn=build_cnn_1d(input_shape=(window_size, <span class="n" >1</span>)) cnn.summary() 
+<span class="c"># ── STEP 5: COMPILE AND TRAIN ─────────────────────────────────────</span> cnn.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=<span class="n" >1e-3</span>),
+    loss=<span class="s" >'categorical_crossentropy' </span>,
+    metrics=[<span class="s" >'accuracy' </span>]) callbacks=[ EarlyStopping(monitor=<span class="s" >'val_loss' </span>, patience=<span class="n" >15</span>, restore_best_weights=<span class="k" >True</span>),
+ReduceLROnPlateau(monitor=<span class="s" >'val_loss' </span>, factor=<span class="n" >0.5</span>, patience=<span class="n" >8</span>, min_lr=<span class="n" >1e-6</span>),
+
+<span class="c"># ReduceLROnPlateau: halve LR 
+if val_loss plateaus 
+for 8 epochs</span> 
+<span class="c"># Helps fine-tune near minimum — like reducing GridSearchCV step size</span>] cnn_history=cnn.fit(X_train, y_train,
+    epochs=<span class="n" >100</span>,
+    batch_size=<span class="n" >64</span>, <span class="c" ># larger batch OK — more windows available</span> validation_split=<span class="n" >0.2</span>,
+    callbacks=callbacks,
+    verbose=<span class="n" >1</span>) 
+<span class="c"># ── STEP 6: EVALUATE ──────────────────────────────────────────────</span> test_loss,
+test_acc=cnn.evaluate(X_test, y_test, verbose=<span class="n" >0</span>) <span class="k">print</span>(f <span class="s" >"CNN Test Accuracy: {test_acc:.4f}" </span>) 
+<span class="c"># ── STEP 7: VISUALIZE WHAT CNN LEARNED ───────────────────────────</span> 
+<span class="c"># Plot the 32 learned kernels 
+from Conv Layer 1</span> kernels=cnn.get_layer(<span class="s" >'conv1' </span>).get_weights()[<span class="n">0</span>] 
+<span class="c"># shape: (64, 1, 32)</span> fig,
+axes=plt.subplots(<span class="n" >4</span>, <span class="n" >8</span>, figsize=(<span class="n" >16</span>, <span class="n" >8</span>)) <span class="k">for</span> i,
+ax <span class="k">in</span> enumerate(axes.flat): ax.plot(kernels[:, <span class="n" >0</span>, i], linewidth=<span class="n" >0.8</span>) 
+<span class="c"># kernel i</span> ax.set_title(f <span class="s" >'K{i}' </span>, fontsize=<span class="n" >7</span>) ax.axis(<span class="s" >'off' </span>) plt.suptitle(<span class="s" >'Learned Conv1 Kernels — What CNN Detects' </span>, fontsize=<span class="n" >12</span>) plt.tight_layout();
+plt.show() 
+<span class="c"># Some kernels will look like spike detectors,
+some like low-pass filters</span> 
+<span class="c"># Compare these to your manually crafted Phase 3 features !</span></pre></div><h2>Tensor Shape Flow — Step by Step</h2><div class="shape-flow"><div style="margin-bottom:8px;font-size:12px;font-weight:700;color:var(--fg3)">Shapes through the 1D CNN (single sample: window_size=1024)</div><div class="sf-row"><div class="sf-box hi"><div class="sf-label">Raw Input</div><div class="sf-shape">(1024, 1)</div></div><div class="sf-arrow">→</div><div class="sf-box hi2"><div class="sf-label">Conv1 (32f, k=64)</div><div class="sf-shape">(1024, 32)</div></div><div class="sf-arrow">→</div><div class="sf-box hi3"><div class="sf-label">MaxPool(4)</div><div class="sf-shape">(256, 32)</div></div></div><div class="sf-row"><div class="sf-box hi2"><div class="sf-label">Conv2 (64f, k=32)</div><div class="sf-shape">(256, 64)</div></div><div class="sf-arrow">→</div><div class="sf-box hi3"><div class="sf-label">MaxPool(4)</div><div class="sf-shape">(64, 64)</div></div><div class="sf-arrow">→</div><div class="sf-box hi2"><div class="sf-label">Conv3 (128f, k=16)</div><div class="sf-shape">(64, 128)</div></div></div><div class="sf-row"><div class="sf-box hi4"><div class="sf-label">GlobalAvgPool</div><div class="sf-shape">(128, )</div></div><div class="sf-arrow">→</div><div class="sf-box hi2"><div class="sf-label">Dense(64)+Drop</div><div class="sf-shape">(64, )</div></div><div class="sf-arrow">→</div><div class="sf-box hi" style="border-color:var(--volt)"><div class="sf-label">Dense(4)+Softmax</div><div class="sf-shape">(4, )</div></div></div></div><div class="checkpoint"><div class="chk-h"><span style="font-size:18px">✅</span><h3>CNN Checkpoint</h3></div><ul class="chk-list"><li>Can you explain what a Conv1D kernel physically does to a vibration signal?</li><li>Can you trace the tensor shapes from (1024, 1) input to (4, ) output?</li><li>Can you explain why MaxPooling creates translational invariance?</li><li>Can you explain why GlobalAveragePooling1D is preferred over Flatten here?</li><li>Can you explain why windowing (1024 samples × 8700 windows) is needed?</li></ul></div></section><!-- ════════════════════════════════════════════════ S3 — RNN ════════════════════════════════════════════════ --><section class="sec" id="s3"><div class="breadcrumb">Implementation <span>›</span>Part 3</div><div class="sec-eyebrow">Task 4 — RNN Implementation</div><div class="sec-h">Simple <span class="hi2">RNN</span>— Sequential Memory for Vibration</div><div class="sec-sub">Treat the vibration signal as a time series. Each sample depends on what came before. Introduces hidden state — the RNN's memory mechanism.</div>
+
+<h2>Why RNN? — Sequential Dependency in Vibration</h2><div class="g2"><div class="card amber"><div class="card-h">The Problem CNN Ignores</div><p>CNN looks at local patterns (64-sample window). It detects "there is a spike here." But it ignores: <em>when was the last spike?</em>For IR fault at 1000 RPM,
+spikes repeat every~93 samples. CNN detects each spike independently. RNN can learn: "spike → 93 samples → spike → 93 samples"=IR pattern.</p></div><div class="card cyan"><div class="card-h">The Hidden State Concept</div><p>At every timestep t,
+the RNN maintains a <strong>hidden state</strong>hₜ — a compressed memory of everything seen so far. hₜ=f(xₜ, hₜ₋₁). This hidden state passes information forward through time.</p><div class="math">hₜ=tanh(<span class="vc" >Wₓ</span>·xₜ + <span class="va" >Wₕ</span>·hₜ₋₁ + b)<br><br><span class="vc">Wₓ</span>: input weights <span class="va">Wₕ</span>: recurrent weights<br>Same weights used at EVERY timestep (weight sharing)</div></div></div><h2>The Vanishing Gradient Problem</h2><div class="box err"><div class="box-ico">🚨</div><div class="box-body"><div class="box-title">Why Simple RNN Fails for Long Sequences</div><div class="box-text">During backpropagation through time (BPTT),
+gradients are multiplied by Wₕ at every step. If |eigenvalue(Wₕ)| &lt;
+1 → gradients vanish after~10 steps. Your IR spike period is 93 steps. RNN cannot learn that the spike 93 steps ago caused this spike. This is why LSTM was invented.</div></div></div><div class="math">Gradient at step t-k: ∂hₜ/∂hₜ₋ₖ=Π (∂hₜ₋ᵢ/∂hₜ₋ᵢ₋₁)<br>i=1..k<br><br>≈ Wₕᵏ · Π f'(hₜ₋ᵢ)<br><br>If ||Wₕ|| < 1: → 0  <span class="vr">(vanishing)</span>   after k steps<br>If ||Wₕ|| > 1: → ∞  <span class="vr">(exploding)</span>  after k steps</div>
+
+<h2>Complete RNN Code</h2><div class="code-block">
+<button class="copy-btn" onclick="copyCode(this)">Copy Code</button><span class="cb-label">Python — Simple RNN for Bearing Fault</span><pre>
+<span class="c"># ══════════════════════════════════════════════════════════════════ # SIMPLE RNN — BEARING FAULT DIAGNOSIS # Treats each window as a sequence of individual samples # ══════════════════════════════════════════════════════════════════</span> <span class="k">import</span> numpy <span class="k">as</span> np <span class="k">from</span> tensorflow.keras.models <span class="k">import</span> Sequential <span class="k">from</span> tensorflow.keras.layers <span class="k">import</span> SimpleRNN,
+Dense,
+Dropout <span class="k">from</span> tensorflow.keras.utils <span class="k">import</span> to_categorical 
+<span class="c"># Reuse X_wins,
+y_onehot 
+from CNN section (shape: (N, 1024, 1))</span> 
+<span class="c"># For RNN: input shape is (timesteps, features_per_step)</span> 
+<span class="c"># We treat each of 1024 timesteps as having 1 feature (the amplitude)</span> X_rnn=X_wins.reshape(-<span class="n" >1</span>, <span class="n" >1024</span>, <span class="n" >1</span>) 
+<span class="c"># (N, 1024, 1) — same as CNN</span> X_tr,
+X_te,
+y_tr,
+y_te=train_test_split(X_rnn, y_onehot, test_size=<span class="n" >0.2</span>, random_state=<span class="n" >42</span>) 
+<span class="c"># ── RNN MODEL ─────────────────────────────────────────────────────</span> rnn_model=Sequential([ SimpleRNN(units=<span class="n" >64</span>, <span class="c" ># 64 hidden state dimensions</span> activation=<span class="s" >'tanh' </span>, <span class="c" ># hₜ=tanh(Wₓxₜ + Wₕhₜ₋₁ + b)</span> return_sequences=<span class="k" >True</span>, <span class="c" ># 
+return hₜ at EVERY timestep (needed 
+for stacking)</span> input_shape=(<span class="n" >1024</span>, <span class="n" >1</span>),
+        name=<span class="s" >'rnn_1' </span>),
+    <span class="c" ># Output: (batch, 1024, 64) — hidden state 
+for each of 1024 timesteps</span> Dropout(<span class="n" >0.3</span>),
+
+    SimpleRNN(units=<span class="n" >32</span>,
+        activation=<span class="s" >'tanh' </span>,
+        return_sequences=<span class="k" >False</span>, <span class="c" ># 
+return ONLY the final hidden state</span> name=<span class="s" >'rnn_2' </span>),
+    <span class="c" ># Output: (batch, 32) — summary of entire sequence</span> <span class="c" ># This is the "memory" of the whole 1024-sample window</span> Dropout(<span class="n" >0.2</span>),
+    Dense(<span class="n" >16</span>, activation=<span class="s" >'relu' </span>),
+    Dense(<span class="n" >4</span>, activation=<span class="s" >'softmax' </span>, name=<span class="s" >'output' </span>)], name=<span class="s" >'simple_rnn_bearing' </span>) rnn_
+model.summary() 
+<span class="c"># SimpleRNN(64): params=64×1+64×64+64=4,
+224 (Wₓ + Wₕ + b)</span> 
+<span class="c"># Note: 64×64=Wₕ (recurrent weights) — same weights applied each step !</span> rnn_
+model.compile(optimizer=<span class="s" >'adam' </span>,
+    loss=<span class="s" >'categorical_crossentropy' </span>,
+    metrics=[<span class="s" >'accuracy' </span>]) 
+<span class="c"># ── TRAINING NOTE ─────────────────────────────────────────────────</span> 
+<span class="c"># RNN is SLOW on 1024-step sequences (1024 sequential operations)</span> 
+<span class="c"># Use smaller window 
+for demonstration: 128 steps</span> X_small=X_wins[:,
+::<span class="n">8</span>,
+:] 
+<span class="c"># downsample: take every 8th sample → 128 steps</span> X_s_tr,
+X_s_te,
+y_s_tr,
+y_s_te=train_test_split(X_small, y_onehot, test_size=<span class="n" >0.2</span>, random_state=<span class="n" >42</span>) rnn_model_small=Sequential([ SimpleRNN(<span class="n" >32</span>, return_sequences=<span class="k" >True</span>, input_shape=(<span class="n" >128</span>, <span class="n" >1</span>)),
+    SimpleRNN(<span class="n" >16</span>, return_sequences=<span class="k" >False</span>),
+    Dense(<span class="n" >4</span>, activation=<span class="s" >'softmax' </span>)]) rnn_model_small.compile(<span class="s" >'adam' </span>, <span class="s" >'categorical_crossentropy' </span>, [<span class="s" >'accuracy' </span>]) rnn_hist=rnn_model_small.fit(X_s_tr, y_s_tr,
+    epochs=<span class="n" >50</span>,
+    batch_size=<span class="n" >32</span>,
+    validation_split=<span class="n" >0.2</span>,
+    callbacks=[EarlyStopping(patience=<span class="n" >10</span>, restore_best_weights=<span class="k" >True</span>)],
+    verbose=<span class="n" >1</span>) 
+<span class="c"># EXPECTED: RNN underperforms CNN and LSTM on this task</span> 
+<span class="c"># Why? 1024 steps>>vanishing gradient horizon (~10-20 steps 
+for SimpleRNN)</span> 
+<span class="c"># IR fault periodicity=93 steps → RNN loses that memory completely</span> 
+<span class="c"># This failure motivates LSTM in the next section !</span></pre></div><h2>RNN Unrolled Through Time</h2><div class="shape-flow"><div style="font-size:12px;font-weight:700;color:var(--fg3);margin-bottom:12px">RNN hidden state flow for IR fault signal (93-sample spike period)</div><div class="sf-row" style="gap:4px"><div class="sf-box" style="min-width:70px"><div class="sf-label">t=0</div><div class="sf-shape" style="color:var(--fg3)">x=0.01</div><div class="sf-shape">h₀=0</div></div><div class="sf-arrow">→</div><div class="sf-box" style="min-width:70px"><div class="sf-label">t=1</div><div class="sf-shape" style="color:var(--fg3)">x=0.02</div><div class="sf-shape">h₁=f(h₀, x₁)</div></div><div class="sf-arrow">→</div><div class="sf-box hi4" style="min-width:70px"><div class="sf-label">t=47 SPIKE !</div><div class="sf-shape" style="color:var(--rose)">x=5.1g</div><div class="sf-shape">h₄₇=high</div></div><div class="sf-arrow">→</div><div class="sf-box" style="min-width:70px;opacity:.6"><div class="sf-label">t=48..93</div><div class="sf-shape" style="color:var(--fg3)">x≈0</div><div class="sf-shape" style="color:var(--rose)">h fading...</div></div><div class="sf-arrow">→</div><div class="sf-box" style="min-width:70px;opacity:.4"><div class="sf-label">t=140 spike</div><div class="sf-shape" style="color:var(--fg3)">x=5.1g</div><div class="sf-shape" style="color:var(--rose)">h₄₇ gone !</div></div></div><div style="font-size:11.5px;color:var(--rose);margin-top:10px">⚠ SimpleRNN forgets the t=47 spike before t=140. Cannot learn 93-sample periodicity → LSTM needed.</div></div></section><!-- ════════════════════════════════════════════════ S4 — LSTM ════════════════════════════════════════════════ --><section class="sec" id="s4"><div class="breadcrumb">Implementation <span>›</span>Part 4</div><div class="sec-eyebrow">Task 5 — LSTM Implementation</div><div class="sec-h"><span class="hi3">LSTM</span>— Long Short-Term Memory</div><div class="sec-sub">LSTM adds a dedicated memory line (cell state) and three gates that control what to remember,
+forget,
+and output. Directly solves the vanishing gradient that broke SimpleRNN on your IR fault periodicity.</div><h2>The Four Gates — Complete Explanation</h2><div class="lstm-gate"><div class="gate-name" style="color:var(--rose)">🔴 Forget Gate — What to Erase</div><div class="gate-math">fₜ=σ(Wf·[hₜ₋₁, xₜ] + bf)</div><div class="gate-desc">Output: fₜ ∈ (0, 1) for each cell state dimension. fₜ≈0 → forget completely. fₜ≈1 → keep exactly. Applied to cell state: Cₜ' = fₜ ⊙ Cₜ₋₁. <strong>Bearing analogy:</strong> When OR fault pattern changes, forget gate erases the old IR pattern from memory.</div>
+ </div><div class="lstm-gate"><div class="gate-name" style="color:var(--volt)">🟢 Input Gate — What to Write</div><div class="gate-math">iₜ=σ(Wᵢ·[hₜ₋₁, xₜ] + bᵢ) (how much to write)<br>C̃ₜ=tanh(Wc·[hₜ₋₁, xₜ] + bc) (candidate values)</div><div class="gate-desc">New cell content: Cₜ=fₜ⊙Cₜ₋₁+iₜ⊙C̃ₜ. iₜ selects which dimensions to update. C̃ₜ provides the candidate values. <strong>Bearing analogy:</strong>When a new IR spike arrives,
+the input gate writes "spike occurred at this timestep" into cell state.</div></div><div class="lstm-gate"><div class="gate-name" style="color:var(--cyan)">🔵 Cell State — The Memory Highway</div><div class="gate-math">Cₜ=fₜ ⊙ Cₜ₋₁+iₜ ⊙ C̃ₜ</div><div class="gate-desc">The cell state Cₜ flows through the entire sequence with only two simple operations: element-wise multiplication (forget) and addition (input). <strong>No non-linearity on the main path</strong>— this is why gradients don't vanish! The gradient of Cₜ w.r.t. Cₜ₋₁ = fₜ ≈ 1 → gradient preserved over long sequences. Bearing: remembers spike interval = 93 samples.</div>
+ </div><div class="lstm-gate"><div class="gate-name" style="color:var(--amber)">🟡 Output Gate — What to Read</div><div class="gate-math">oₜ=σ(Wo·[hₜ₋₁, xₜ] + bo)<br>hₜ=oₜ ⊙ tanh(Cₜ)</div><div class="gate-desc">oₜ decides which parts of cell state to expose as hidden state hₜ. hₜ is passed to the next timestep AND used for prediction. <strong>Bearing analogy:</strong>At the end of the window,
+output gate extracts "IR fault detected with periodicity 93" from cell state as the classification signal.</div></div><h2>Why LSTM Fixes Vanishing Gradient</h2><div class="g2"><div class="card rose"><div class="card-h">SimpleRNN Gradient</div><div class="math">∂L/∂hₜ₋ₖ=∂L/∂hₜ · (Wₕ·diag(f'(h)))ᵏ<br><br>= product of k matrices<br><br>If ||Wₕ·diag(f')|| &lt; 1 → exponential decay<br>After 93 steps: almost zero → IR period forgotten</div> </div> <div class="card volt" > <div class="card-h" >LSTM Cell State Gradient</div> <div class="math" >∂Cₜ/∂Cₜ₋₁=fₜ (forget gate value)<br><br>∂L/∂Cₜ₋ₖ ≈ ∂L/∂Cₜ · Π fₜ₋ᵢ<br> i=1..k<br><br>When fₜ ≈ 1 (keep memory): gradient ≈ 1 for all k<br>No vanishing ! IR period (93 steps) preserved.</div> </div> </div> <h2>Complete LSTM Code</h2> <div class="code-block" >
+<button class="copy-btn" onclick="copyCode(this)">Copy Code</button> <span class="cb-label" >Python — LSTM for Bearing Fault</span> <pre><span class="c" ># ══════════════════════════════════════════════════════════════════ # LSTM — BEARING FAULT DIAGNOSIS # Same data pipeline as RNN (windowed vibration segments) # Key change: LSTM replaces SimpleRNN → solves vanishing gradient # ══════════════════════════════════════════════════════════════════</span> <span class="k" >from</span> tensorflow.keras.layers <span class="k" >import</span> LSTM, Bidirectional <span class="c" ># ── STANDARD LSTM ─────────────────────────────────────────────────</span> lstm_model=Sequential([ LSTM(units=<span class="n" >64</span>,
+            return_sequences=<span class="k" >True</span>, <span class="c" ># pass all timesteps to next layer</span> input_shape=(<span class="n" >1024</span>, <span class="n" >1</span>), <span class="c" ># (timesteps=1024, features=1)</span> name=<span class="s" >'lstm_1' </span>),
+        <span class="c" ># LSTM vs SimpleRNN parameter count:</span> <span class="c" ># SimpleRNN(64): 64+64×64+64=4, 224 params</span> <span class="c" ># LSTM(64): 4 × (64+64×64+64)=16, 896 params (4 gates !)</span> <span class="c" ># More parameters → more expressive → better at long sequences</span> Dropout(<span class="n" >0.3</span>),
+
+        LSTM(units=<span class="n" >32</span>,
+            return_sequences=<span class="k" >False</span>, <span class="c" ># only final state → (batch, 32)</span> name=<span class="s" >'lstm_2' </span>),
+
+        Dense(<span class="n" >16</span>, activation=<span class="s" >'relu' </span>),
+        Dropout(<span class="n" >0.2</span>),
+        Dense(<span class="n" >4</span>, activation=<span class="s" >'softmax' </span>)], name=<span class="s" >'lstm_bearing' </span>) lstm_
+model.summary() <span class="c" ># ── BIDIRECTIONAL LSTM (Advanced) ─────────────────────────────────</span> <span class="c" ># Processes sequence FORWARD and BACKWARD simultaneously</span> <span class="c" ># For vibration: knowing future context helps classify current state</span> bilstm_model=Sequential([ Bidirectional(LSTM(<span class="n" >32</span>, return_sequences=<span class="k" >True</span>), input_shape=(<span class="n" >1024</span>, <span class="n" >1</span>)),
+        <span class="c" ># Concatenates forward hidden state + backward hidden state</span> <span class="c" ># Output: (batch, 1024, 64) — 32 forward + 32 backward</span> Dropout(<span class="n" >0.3</span>),
+        Bidirectional(LSTM(<span class="n" >16</span>)), <span class="c" ># return_sequences=False (default)</span> Dense(<span class="n" >4</span>, activation=<span class="s" >'softmax' </span>)], name=<span class="s" >'bilstm_bearing' </span>) <span class="c" ># ── TRAIN LSTM ────────────────────────────────────────────────────</span> lstm_
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=<span class="n" >5e-4</span>),
+        <span class="c" ># Lower LR than CNN — LSTM has more parameters, needs finer updates</span> loss=<span class="s" >'categorical_crossentropy' </span>,
+        metrics=[<span class="s" >'accuracy' </span>]) lstm_hist=lstm_
+model.fit(X_tr, y_tr, <span class="c" ># using the (N, 1024, 1) data 
+from CNN section</span> epochs=<span class="n" >100</span>,
+        batch_size=<span class="n" >32</span>,
+        validation_split=<span class="n" >0.2</span>,
+        callbacks=[ EarlyStopping(patience=<span class="n" >15</span>, restore_best_weights=<span class="k" >True</span>),
+        ReduceLROnPlateau(factor=<span class="n" >0.5</span>, patience=<span class="n" >7</span>)],
+        verbose=<span class="n" >1</span>) lstm_loss, lstm_acc=lstm_
+model.evaluate(X_te, y_te, verbose=<span class="n" >0</span>) <span class="k" >print</span>(f <span class="s" >"LSTM Accuracy: {lstm_acc:.4f}" </span>) <span class="c" ># ── GATE VALUE INSPECTION ─────────────────────────────────────────</span> <span class="c" ># Build a model that outputs gate values (
+for visualization)</span> <span class="k" >import</span> tensorflow.keras.backend <span class="k" >as</span> K <span class="c" ># Get LSTM layer weights</span> lstm_layer=lstm_model.get_layer(<span class="s" >'lstm_1' </span>) Wk=lstm_layer.get_weights() <span class="c" ># Wk[0]: kernel (input weights) shape (1, 64×4) — 4 gates, 64 units each</span> <span class="c" ># Wk[1]: recurrent kernel shape (64, 64×4)</span> <span class="c" ># Wk[2]: bias shape (64×4, ) or (2×64×4, ) depending on implementation</span> <span class="k" >print</span>(f <span class="s" >"Input kernel shape:     {Wk[0].shape}" </span>) <span class="k" >print</span>(f <span class="s" >"Recurrent kernel shape: {Wk[1].shape}" </span>) <span class="c" ># The 4-gate ordering in Keras LSTM: [input, forget, cell, output]</span></pre> </div> <h2>LSTM Gate Tensor Flow</h2> <div class="shape-flow" > <div style="font-size:12px;font-weight:700;color:var(--fg3);margin-bottom:10px" >LSTM at one timestep t — both Cₜ₋₁ and hₜ₋₁ enter, Cₜ and hₜ exit</div> <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;font-size:11.5px" > <div class="sf-box" style="border-color:var(--rose)" ><div class="sf-label" style="color:var(--rose)" >① Forget Gate</div><div class="sf-shape" style="font-size:11px" >fₜ=σ(Wf·[h, x]+b)</div><div class="sf-shape" style="font-size:11px;color:var(--fg2)" >erase old memory</div></div> <div class="sf-box" style="border-color:var(--volt)" ><div class="sf-label" style="color:var(--volt)" >② Input Gate</div><div class="sf-shape" style="font-size:11px" >iₜ=σ(Wᵢ·[h, x]+b)</div><div class="sf-shape" style="font-size:11px;color:var(--fg2)" >select new info</div></div> <div class="sf-box" style="border-color:var(--cyan)" ><div class="sf-label" style="color:var(--cyan)" >③ Cell Update</div><div class="sf-shape" style="font-size:11px" >Cₜ=fₜ⊙Cₜ₋₁+iₜ⊙C̃ₜ</div><div class="sf-shape" style="font-size:11px;color:var(--fg2)" >memory highway</div></div> <div class="sf-box" style="border-color:var(--amber)" ><div class="sf-label" style="color:var(--amber)" >④ Output Gate</div><div class="sf-shape" style="font-size:11px" >hₜ=oₜ⊙tanh(Cₜ)</div><div class="sf-shape" style="font-size:11px;color:var(--fg2)" >expose memory</div></div> </div> <div style="margin-top:12px;font-size:11.5px;color:var(--fg2)" > All 4 gates receive <strong>[hₜ₋₁, xₜ]</strong> concatenated. Cₜ₋₁ and hₜ₋₁ enter; Cₜ and hₜ exit to next step. </div> </div> <div class="checkpoint" > <div class="chk-h" ><span style="font-size:18px" >✅</span><h3>LSTM Checkpoint</h3></div> <ul class="chk-list" > <li>Can you explain the forget gate, input gate, cell state, and output gate in your own words?</li> <li>Can you explain mathematically why LSTM cell state doesn't suffer vanishing gradients?</li>
+ <li>Can you compare SimpleRNN and LSTM parameter counts for 64 units with 1 input?</li> <li>Can you explain what Bidirectional LSTM adds over regular LSTM?</li> <li>Can you connect LSTM's ability to remember long sequences to IR fault periodicity (93 samples)?</li>
+ </ul> </div> </section> <!-- ════════════════════════════════════════════════ S5 — MODEL COMPARISON ════════════════════════════════════════════════ --> <section class="sec" id="s5" > <div class="breadcrumb" >Analysis <span>›</span> Part 5</div> <div class="sec-eyebrow" >Task 6 — Full Model Comparison</div> <div class="sec-h" >Model <span class="hi" >Comparison</span> — All 7 Approaches</div> <div class="sec-sub" >Decision Tree, Random Forest, XGBoost, ANN, CNN, RNN, LSTM — compared across every dimension that matters for your bearing project.</div> <h2>Comprehensive Comparison Table</h2> <div class="tbl-wrap" > <table> <tr> <th>Model</th><th>Accuracy (est.)</th><th>Training Time</th><th>Data Required</th><th>Interpretability</th><th>Computational Cost</th><th>Feature Engineering</th><th>Bearing Verdict</th> </tr> <tr class="row-dt" > <td><strong>Decision Tree</strong></td> <td class="y" >81.67%</td> <td class="g" >&lt; 1 sec</td> <td class="g" >Very low (100+)</td> <td class="g" >Very high (viz. tree)</td> <td class="g" >Minimal</td> <td>Manual (Phase 3)</td> <td class="b" >Baseline only — unstable</td> </tr> <tr class="row-rf" > <td><strong>Random Forest</strong></td> <td class="g" >96.67% ✅</td> <td class="g" >2-5 sec</td> <td class="g" >Low (200+)</td> <td class="y" >Medium (importances)</td> <td class="g" >Low</td> <td>Manual (Phase 3)</td> <td class="g" >Winner for this dataset</td> </tr> <tr class="row-xgb" > <td><strong>XGBoost</strong></td> <td class="y" >88.33%</td> <td class="g" >5-10 sec</td> <td class="y" >Medium (500+)</td> <td class="y" >Medium (SHAP)</td> <td class="y" >Medium</td> <td>Manual (Phase 3)</td> <td class="y" >Loses to RF on 300 samples</td> </tr> <tr class="row-ann" > <td><strong>ANN / MLP</strong></td> <td class="y" >~88-92%</td> <td class="y" >30-60 sec</td> <td class="y" >Medium (1K+)</td> <td class="b" >Low</td> <td class="y" >Medium</td> <td>Manual (Phase 3)</td> <td class="y" >Close to RF, more flexible</td> </tr> <tr class="row-cnn" > <td><strong>1D CNN</strong></td> <td class="y" >~90-95%*</td> <td class="y" >2-5 min</td> <td class="b" >High (5K+ windows)</td> <td class="b" >Low</td> <td class="y" >GPU recommended</td> <td>Automatic (raw signal)</td> <td class="g" >Best if data is large</td> </tr> <tr class="row-rnn" > <td><strong>RNN</strong></td> <td class="b" >~70-80%</td> <td class="b" >10-20 min</td> <td class="b" >High (5K+ windows)</td> <td class="b" >Very low</td> <td class="b" >High (sequential)</td> <td>Automatic (raw signal)</td> <td class="b" >Vanishing gradient hurts</td> </tr> <tr class="row-lstm" > <td><strong>LSTM</strong></td> <td class="y" >~88-93%*</td> <td class="b" >20-40 min</td> <td class="b" >High (5K+ windows)</td> <td class="b" >Very low</td> <td class="b" >Very high (4 gates)</td> <td>Automatic (raw signal)</td> <td class="y" >Good for periodic faults</td> </tr> </table> </div> <div style="font-size:11.5px;color:var(--fg3);margin-top:6px" >* CNN and LSTM estimates assume windowing augmentation (~8700 windows from 300 recordings). Raw 300-sample training would likely underperform RF.</div> <h2>Decision Framework — Which Model When?</h2> <div class="g2" > <div class="card volt" > <div class="card-h" >Use Random Forest / XGBoost when:</div> <ul> <li>Dataset &lt; 5K samples (like your 300 recordings)</li> <li>Features have physical meaning (kurtosis=IR fault detector)</li> <li>Interpretability required (maintenance engineers need explanations)</li> <li>Fast inference needed (edge deployment, real-time monitoring)</li> <li>No GPU available</li> </ul> </div> <div class="card cyan" > <div class="card-h" >Use 1D CNN when:</div> <ul> <li>Raw signal data available, dataset large (10K+ recordings or windowed)</li> <li>Feature engineering bottleneck (hard to know what features to extract)</li> <li>Multiple sensor channels (multichannel convolution)</li> <li>Speed matters at inference (fast after training)</li> <li>Pattern location matters (translational invariance needed)</li> </ul> </div> <div class="card amber" > <div class="card-h" >Use LSTM when:</div> <ul> <li>Long-range temporal dependencies matter (IR spike periodicity)</li> <li>Variable-length sequences (different recording durations)</li> <li>Prediction task (predict next N samples — anomaly detection)</li> <li>Sequence classification where order critically matters</li> </ul> </div> <div class="card purple" > <div class="card-h" >Use CNN-LSTM Hybrid when:</div> <ul> <li>Need both local pattern detection (CNN) AND temporal tracking (LSTM)</li> <li>Best of both worlds: CNN extracts features, LSTM classifies over time</li> <li>Architecture: Conv → Pool → LSTM → Dense</li> <li>This is the state-of-art for industrial fault diagnosis</li> </ul> </div> </div> <h2>Why Random Forest Won on Your Specific Dataset</h2> <div class="box ok" > <div class="box-ico" >🏆</div> <div class="box-body" > <div class="box-title" >The Small Data Verdict</div> <div class="box-text" ><strong>300 samples with 9 hand-crafted features:</strong> Random Forest wins because (1) tree splits are discrete, sample-efficient decision rules, (2) bootstrap averaging reduces variance without needing more data, (3) your F-ratio-ranked features already encode bearing physics, (4) 240 training samples &gt; &gt; 2, 852 ANN parameters=overfitting. If you had 30, 000 recordings and fed raw signals, CNN would likely win.</div> </div> </div> <h2>Accuracy vs Sample Count — Qualitative Curve</h2> <div style="background:var(--ink1);border:1px solid var(--rim);border-radius:var(--r);padding:20px;margin:16px 0;text-align:center" > <canvas id="acc-chart" width="560" height="260" style="display:block;margin:0 auto;max-width:100%" ></canvas> </div> </section> <!-- ════════════════════════════════════════════════ S6 — MENTOR Q&A ════════════════════════════════════════════════ --> <section class="sec" id="s6" > <div class="breadcrumb" >Analysis <span>›</span> Part 6</div> <div class="sec-eyebrow" >Task 7 — Mentor Discussion</div> <div class="sec-h" >30 Mentor <span class="hi" >Questions</span> &amp; Answers</div> <div class="sec-sub" >Deep technical questions your mentor will ask about every design decision — from feature engineering to LSTM gates. Know these cold.</div> <div class="tabs-bar" > <button class="tab on" onclick="switchTab('mq',0)" >Architecture (10)</button> <button class="tab" onclick="switchTab('mq',1)" >Training (10)</button> <button class="tab" onclick="switchTab('mq',2)" >Results (10)</button> </div> <div id="mq-0" class="tab-pane on" ></div> <div id="mq-1" class="tab-pane" ></div> <div id="mq-2" class="tab-pane" ></div> </section> <!-- ════════════════════════════════════════════════ S7 — RESEARCH DIRECTIONS ════════════════════════════════════════════════ --> <section class="sec" id="s7" > <div class="breadcrumb" >Analysis <span>›</span> Part 7</div> <div class="sec-eyebrow" >Task 8 — Research Extension</div> <div class="sec-h" >Research <span class="hi" >Directions</span> — From Project to Paper</div> <div class="sec-sub" >Your bearing fault project has strong publication potential. Here are 8 concrete research extensions that would constitute original contributions.</div> <h2>Publication-Ready Extensions</h2> <div class="card volt" style="margin-bottom:14px" > <div class="card-h" ><span style="font-size:20px" >①</span> Wavelet Transform + CNN (W-CNN)</div> <p><strong>What:</strong> Replace raw signal with 2D time-frequency representation using Continuous Wavelet Transform (CWT). CWT image shape: (128 scales × 15625 time) → fed to 2D CNN.</p> <p><strong>Why better:</strong> CWT captures time-varying frequency content. IR fault at 1000 RPM has energy at ~130 Hz — CWT makes this visible. Your FFT gives frequency content but loses temporal location. CWT gives both simultaneously (like a spectrogram but better time-frequency resolution).</p> <p><strong>Novelty:</strong> Test on your 4-bearing-type dataset — does CWT generalize across bearing types better than time-domain CNN?</p> <div class="math" >CWT(a, b)=(1/√a) ∫ x(t)·ψ*((t-b)/a)dt<br><br>a=scale (inversely proportional to frequency)<br>b=translation (time position)<br>ψ=mother wavelet (Morlet, Mexican Hat)</div> </div> <div class="card cyan" style="margin-bottom:14px" > <div class="card-h" ><span style="font-size:20px" >②</span> CNN-LSTM Hybrid Architecture</div> <p><strong>What:</strong> Stack CNN (feature extraction) before LSTM (temporal sequence modeling). CNN extracts features from each window; LSTM classifies the sequence of windows over time.</p> <p><strong>Architecture:</strong> Input(15625, 1) → Conv1D → Pool → LSTM → Dense → Softmax</p> <p><strong>Why novel:</strong> CNN-LSTM is theoretically motivated for bearing diagnosis — CNN learns "what the fault looks like in a window," LSTM learns "how fault patterns evolve across the 1-second recording." Current literature rarely applies both to the same bearing dataset with your 4-type configuration.</p> <div class="code-block" >
+<button class="copy-btn" onclick="copyCode(this)">Copy Code</button> <pre><span class="c" ># CNN-LSTM hybrid skeleton</span> hybrid=Sequential([ Conv1D(<span class="n" >64</span>, <span class="n" >32</span>, activation=<span class="s" >'relu' </span>, padding=<span class="s" >'same' </span>, input_shape=(<span class="n" >1024</span>, <span class="n" >1</span>)),
+        MaxPooling1D(<span class="n" >4</span>), <span class="c" ># (1024, 1) → (256, 64)</span> Conv1D(<span class="n" >128</span>, <span class="n" >16</span>, activation=<span class="s" >'relu' </span>, padding=<span class="s" >'same' </span>),
+        MaxPooling1D(<span class="n" >4</span>), <span class="c" ># (256, 64) → (64, 128)</span> LSTM(<span class="n" >64</span>, return_sequences=<span class="k" >False</span>), <span class="c" ># treat 64 CNN outputs as a sequence</span> Dense(<span class="n" >4</span>, activation=<span class="s" >'softmax' </span>)])</pre> </div> </div> <div class="card purple" style="margin-bottom:14px" > <div class="card-h" ><span style="font-size:20px" >③</span> Attention Mechanism</div> <p><strong>What:</strong> Add self-attention after LSTM. Attention computes: "which timesteps were most important for classification?" Produces interpretable weights over the signal.</p> <p><strong>Why important:</strong> Your phase 5 identified that envelope at 5-7 kHz reveals RE fault. Attention maps should show high weight at the 5-7 kHz spike moments — if they do, the model is learning the same physics you hand-coded. This is your research hypothesis.</p> <p><strong>Publication angle:</strong> "Interpretable Bearing Fault Diagnosis: Do Attention Maps Recover Physically Meaningful Frequency Content?" </p> <div class="math" >Attention(Q, K, V)=Softmax(QKᵀ/√dₖ)·V<br><br>For temporal attention: weight each timestep by its relevance<br>αₜ=exp(eₜ) / Σ exp(eₜ')  where eₜ = score(hₜ)<br>context = Σ αₜ · hₜ</div>
+ </div> <div class="card amber" style="margin-bottom:14px" > <div class="card-h" ><span style="font-size:20px" >④</span> Transfer Learning Across Bearing Types</div> <p><strong>What:</strong> Your dataset has 4 bearing types (NU204-E plastic/metal, STO20). Train on 3 bearing types, test on the 4th. Does the model generalize? This is the dataset's designed purpose.</p>
+ <p><strong>Research question:</strong> Does a CNN trained on NU204-E features transfer to STO20? Which features are bearing-agnostic (fault physics) vs bearing-specific (geometry)?</p> <p><strong>Implementation:</strong> Pre-train on 3 bearing types → fine-tune last 2 layers on 4th type (10 recordings). Compare to training from scratch on 4th type only.</p> <div class="tags" ><span class="tag tp" >Domain adaptation</span><span class="tag tp" >Few-shot learning</span><span class="tag tp" >Fine-tuning</span></div> </div> <div class="card rose" style="margin-bottom:14px" > <div class="card-h" ><span style="font-size:20px" >⑤</span> Predictive Maintenance — Remaining Useful Life</div> <p><strong>What:</strong> Extend from fault classification to fault severity regression. Currently: OK/IR/OR/RE. Next: predict "bearing will fail in X hours." Requires run-to-failure dataset (PRONOSTIA/FEMTO bearing dataset is standard).</p> <p><strong>Model:</strong> LSTM regression on sliding windows, predicting normalized remaining useful life (RUL) ∈ [0, 1]. Loss: MSE on RUL. Evaluation: RMSE, PHM score.</p> <p><strong>Research value:</strong> Highest practical impact — bridges your classification work to industrial deployment. Links to ISO 13374 (condition monitoring) standards.</p> </div> <div class="card cyan" style="margin-bottom:14px" > <div class="card-h" ><span style="font-size:20px" >⑥</span> Noise Robustness Study</div> <p><strong>What:</strong> Add synthetic Gaussian noise to test signals at SNR=30, 20, 10, 5, 0 dB. Measure accuracy degradation per model. Compare RF vs CNN vs LSTM robustness curves.</p> <p><strong>Hypothesis:</strong> CNN (spatial patterns) more robust than RF (statistics) at low SNR because convolution acts as learned bandpass filter. LSTM potentially most robust because it can track fault periodicity even through noise.</p> <p><strong>Publication angle:</strong> "Noise Sensitivity Analysis of ML vs DL Approaches for Bearing Fault Diagnosis Under Industrial Conditions" </p> </div> <div class="card volt" style="margin-bottom:14px" > <div class="card-h" ><span style="font-size:20px" >⑦</span> Explainability — Grad-CAM for 1D Signals</div> <p><strong>What:</strong> Apply Grad-CAM (Gradient-weighted Class Activation Mapping) to your 1D CNN. For each fault class, produce a heatmap over the signal showing which time regions activated the classification.</p> <p><strong>Expected results:</strong> IR fault → Grad-CAM highlights the periodic spike locations. OR fault → highlights dense scattered regions. RE → highlights nothing in time-domain (validating your Phase 5 finding).</p> <p><strong>Why publish:</strong> Bridges black-box DL with physical bearing interpretation. Directly validates whether CNN learned the same features you hand-engineered in Phase 3-5.</p> <div class="math" >Grad-CAM saliency: S(t)=ReLU(Σₖ αₖ · Aₖ(t))<br>αₖ=(1/T)·Σₜ ∂Loss/∂Aₖ(t) (gradient pooling)</div> </div> <div class="card amber" > <div class="card-h" ><span style="font-size:20px" >⑧</span> Multi-Sensor Fusion</div> <p><strong>What:</strong> Your current dataset has 1 accelerometer axis. Real systems have 3-axis vibration + temperature + current signature. Extend to multi-channel 2D CNN or multi-input fusion network.</p> <p><strong>Architecture:</strong> Branch 1: vibration CNN → Branch 2: temperature RNN → Branch 3: current FFT features → Concatenate → Dense → Softmax</p> <p><strong>Practical impact:</strong> Current (MCSA) is a non-invasive fault detection method. Fusing it with vibration dramatically improves RE detection (the hardest class in your project).</p> </div> <h2>Suggested Paper Title &amp; Structure</h2> <div class="card rim" > <div class="card-h" >Research Paper Skeleton</div> <p><strong>Title:</strong> "Comparative Study of Machine Learning and Deep Learning Approaches for Multi-Class Bearing Fault Diagnosis: From Feature Engineering to End-to-End Learning" </p> <p><strong>Abstract contributions:</strong> (1) Systematic comparison of 7 models on same dataset, (2) Envelope analysis vs CNN feature learning comparison, (3) Transfer learning across 4 bearing configurations, (4) Interpretability analysis via Grad-CAM</p> <div class="g2" style="margin-top:12px" > <div style="font-size:12.5px;color:var(--fg2)" > <strong style="color:var(--volt)" >Section structure:</strong><br> I. Introduction (bearing diagnosis importance)<br> II. Related Work (ML/DL comparison papers)<br> III. Dataset &amp; Preprocessing<br> IV. Feature Engineering (your Phase 3-5)<br> V. ML Baselines (DT, RF, XGBoost)<br> VI. DL Methods (ANN, 1D CNN, LSTM)<br> VII. Experiments &amp; Results<br> VIII. Interpretability Analysis<br> IX. Transfer Learning Study<br> X. Conclusion &amp; Future Work </div> <div style="font-size:12.5px;color:var(--fg2)" > <strong style="color:var(--cyan)" >Target venues:</strong><br> • Mechanical Systems and Signal Processing (MSSP)<br> • IEEE Transactions on Industrial Electronics<br> • Expert Systems with Applications<br> • Computers in Industry<br> • Applied Sciences (MDPI — open access)<br><br> <strong style="color:var(--amber)" >Impact factor range:</strong> 4–10 </div> </div> </div> </section> </div><!-- /content --> </div><!-- /main-wrap --> </div><!-- /shell --> <script> // ═══════════════════════════════════════════
+        // NAV
+        // ═══════════════════════════════════════════
+        const sections=['s0', 's1', 's2', 's3', 's4', 's5', 's6', 's7'];
+
+        const titles= {
+            s0:'Deep Learning Roadmap', s1:'ANN / MLP Implementation', s2:'1D CNN Implementation', s3:'RNN Implementation', s4:'LSTM Implementation', s5:'Model Comparison', s6:'Mentor Q&A (30 Questions)', s7:'Research Directions'
+        }
+
+        ;
+        let done=new Set();
+
+        function show(id) {
+            sections.forEach(s=> {
+                    const el=document.getElementById(s);
+                    if(el)el.classList.toggle('vis', s===id);
+                    const nb=document.getElementById('nb-' +s);
+                    if(nb)nb.classList.toggle('on', s===id);
+                });
+            document.getElementById('tb-title').textContent=titles[id]||'';
+            document.querySelector('.main-wrap').scrollTop=0;
+            if(id==='s5')setTimeout(drawAccChart, 100);
+
+            
+            if(id==='s6') {
+                buildMentorQs(); setTimeout(()=>switchTab('mq', 0), 50);
+            }
+            const btn=document.querySelector('.pill-volt');
+            if(btn) {
+                if(done.has(id)) {
+                    btn.innerHTML = '✕ Unmark Done';
+                } else {
+                    btn.innerHTML = '✓ Mark Done';
+                }
+            }
+
+        }
+
+        function toggleRail() {
+            document.getElementById('rail').classList.toggle('off');
+        }
+
+        function markDone() {
+            const cur=sections.find(s=>document.getElementById(s).classList.contains('vis'));
+            if( !cur)return;
+            
+            const nb=document.getElementById('nb-' +cur);
+            const btn=document.querySelector('.pill-volt');
+            
+            if (done.has(cur)) {
+                done.delete(cur);
+                if(nb)nb.classList.remove('done');
+                if(btn) btn.innerHTML = '✓ Mark Done';
+            } else {
+                done.add(cur);
+                if(nb)nb.classList.add('done');
+                if(btn) btn.innerHTML = '✕ Unmark Done';
+            }
+            
+            const pct=Math.round(done.size/sections.length*100);
+            document.getElementById('pct').textContent=pct+'%';
+            document.getElementById('pbar').style.width=pct+'%';
+        }
+
+        // ═══════════════════════════════════════════
+        // TABS
+        // ═══════════════════════════════════════════
+        function switchTab(group, idx) {
+            const panes=document.querySelectorAll(`[id^="${group}-"]`);
+            panes.forEach((p, i)=>p.classList.toggle('on', i===idx));
+            const btns=document.querySelectorAll('.tabs-bar .tab');
+            let gi=0;
+
+            btns.forEach(b=> {
+                    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes(`'${group}'`)) {
+                        b.classList.toggle('on', gi===idx); gi++;
+                    }
+                });
+        }
+
+        function toggleAcc(h) {
+            h.classList.toggle('open');
+            h.nextElementSibling.classList.toggle('open');
+        }
+
+        // ═══════════════════════════════════════════
+        // MENTOR Q&A DATA
+        // ═══════════════════════════════════════════
+        const mqArch=[ ["Why did you use CNN instead of ANN for raw vibration signals?", "ANN treats input as a flat vector — it has no concept of neighboring samples. A vibration signal has strong local structure: a 5g spike at time t is related to the values at t±10, not to values at t+1000. Conv1D captures this local structure via kernels. ANN would need O(n²) parameters to capture all pairwise relationships; CNN captures local patterns with O(k×n) parameters. Additionally, ANN on 15,625 raw inputs would have millions of parameters, dramatically overfitting on 300 recordings.", "b"],
+        ["Why is MaxPooling used instead of AveragePooling in CNN?", "MaxPooling keeps the strongest activation in each pool window — it says 'was this pattern present anywhere in this region?' For spike detection (IR fault), a spike at position 101 vs 103 shouldn't matter. MaxPool captures this translational invariance. AveragePooling would dilute a sharp spike by averaging it with surrounding near-zero values — reducing the spike's signature, which is exactly the feature we want to detect.", "i"],
+        ["What is the input shape for 1D CNN and why does it have 3 dimensions?", "Shape is (batch_size, timesteps, channels). The third dimension (channels) is analogous to RGB channels in 2D CNNs. For a single vibration signal, channels=1. If you had 3-axis accelerometer data, channels=3 and Conv1D would process all axes simultaneously with cross-channel filters. Keras Conv1D requires this shape explicitly.", "b"],
+        ["Why did you add BatchNormalization after Conv layers?", "Batch Norm normalizes the output of each layer to zero mean and unit variance across the batch. Without it, as training progresses, the distribution of layer inputs shifts ('internal covariate shift') — gradients become noisy, requiring lower learning rates. BatchNorm allows 10× higher learning rates, reduces sensitivity to initialization, and acts as a regularizer. Particularly important for deep CNNs where distribution shift compounds across layers.", "i"],
+        ["Why use GlobalAveragePooling1D instead of Flatten before Dense layers?", "Flatten after 3 Conv+Pool blocks produces very large vectors (e.g., 64 timesteps × 128 filters = 8,192 values). A Dense layer over 8,192 inputs has millions of parameters → massive overfitting on ~7K windows. GlobalAveragePooling1D averages across the time axis → 128 values. It's also position-agnostic: the 128 values represent 'what features are present globally' rather than 'where exactly each feature appeared'. Better generalization.", "a"],
+        ["Why did you use 4 LSTM gates instead of 2 like GRU?", "GRU (Gated Recurrent Unit, 2014) has 2 gates (reset + update) and no separate cell state — simpler, fewer parameters. LSTM (1997) has 3 gates + cell state. In practice: GRU trains faster (fewer params), LSTM potentially more expressive for very long sequences. For vibration at 1024 timesteps, GRU and LSTM often perform similarly. LSTM is taught first because its gates (forget/input/cell/output) more clearly map to the credit assignment problem in biological memory.", "i"],
+        ["What is the role of the Bidirectional wrapper in BiLSTM?", "Bidirectional processes the sequence both forward (t=0 to T) and backward (t=T to 0), then concatenates the hidden states. For classification at the end of a sequence, the backward pass gives 'context from the future.' For vibration, this means: a spike at t=500 influences the interpretation of what happened at t=400 (backward direction). Doubles parameters but often improves performance when the full sequence context is available.", "a"],
+        ["Why does Dropout help prevent overfitting more in ANN than in CNN?", "In ANN, Dropout randomly zeros individual neurons — forcing the network to learn redundant pathways. In CNN, neurons share weights (each filter is one shared kernel). Dropping individual activation values is less effective because the same kernel still processes other timesteps. Spatial Dropout (drop entire feature maps) works better for CNNs. ANN has no weight sharing, so standard Dropout directly creates independent redundant representations per feature.", "a"],
+        ["What is the difference between return_sequences=True and False in LSTM?", "return_sequences=True: return hidden state hₜ at EVERY timestep → output shape (batch, T, units). Used when stacking LSTM layers or needing timestep-wise predictions. return_sequences=False (default): return ONLY the final hidden state hₙ → output shape (batch, units). Used for sequence classification (one label per sequence). The first LSTM in a stack uses True; the last uses False.", "b"],
+        ["Why did you downsample the signal before RNN but not CNN?", "CNN processes timesteps in parallel (all convolutions computed simultaneously). 1024 timesteps = 1024 parallel dot products. Efficient. RNN processes timesteps sequentially — BPTT computes gradients through all 1024 steps. Slow. Memory grows linearly with sequence length. For SimpleRNN with vanishing gradient, downsampling also reduces the number of steps the gradient must traverse, partially mitigating vanishing.", "i"]];
+
+        const mqTrain=[ ["Why was Adam optimizer chosen instead of SGD?", "SGD uses a fixed learning rate for all parameters and all layers. Adam tracks the first moment (mean gradient, like momentum) and second moment (squared gradient, like AdaGrad's per-parameter lr) with exponential moving averages. Result: each weight gets an adaptive learning rate proportional to 1/√(squared_gradient). Kurtosis weight (large gradients from 172 vs 0.25 differences) gets smaller lr; mean weight (tiny gradients) gets larger lr. Converges 5-10× faster than SGD for typical networks.", "i"],
+        ["What does Early Stopping's restore_best_weights=True do?", "Without it: training stops at the worst generalization epoch (when patience expires). With it: when training stops, weights are restored to the epoch with best val_loss — not the last epoch. Equivalent to saying 'train until overfitting begins, then use the model before overfitting.' Like selecting the best fold in cross-validation.", "b"],
+        ["Why is validation_split=0.2 applied BEFORE fit, and why is it important?", "With validation_split=0.2: Keras holds out the LAST 20% of training data as validation. This means: (1) validation set is not shuffled — it's always the same 48 samples. (2) Scaler was already fit on train (240 samples). (3) Early stopping monitors val_loss on these 48 samples to detect overfitting. If you didn't do this, the model would train until epoch 200 regardless of generalization.", "b"],
+        ["What is ReduceLROnPlateau and why was it added for CNN but not ANN?", "ReduceLROnPlateau halves the learning rate if val_loss doesn't improve for patience=8 epochs. Useful for CNN because: CNN has more parameters and more complex loss landscape. After initial rapid improvement, it may need finer steps near the minimum. ANN on 9 features converges quickly and simply — a fixed lr suffices. Think of it as dynamic GridSearchCV for learning rate during training.", "i"],
+        ["How does class imbalance affect training, and was it an issue here?", "Your dataset: ~75 samples per class (balanced). No issue. If imbalanced (e.g., 225 OK, 25 RE): (1) model sees mostly OK → biased toward predicting OK. (2) Accuracy is misleading (90% accuracy by always predicting OK!). Fixes: class_weight={'OK':1,'RE':9} in model.fit, or SMOTE oversampling, or stratified sampling. Your Phase 4 experience with RE recall (81.25%) came from feature inadequacy, not class imbalance.", "i"],
+        ["Why is batch_size=32 a common default?", "Powers of 2 are GPU-efficient (memory alignment). 32 is large enough for stable gradient estimates, small enough for frequent updates. With 240 training samples and batch=32: 7.5 steps/epoch. Smaller batch → noisier gradients (can escape local minima) → better generalization. Larger batch → stable but computationally wasteful for small datasets. Research ('On Large-Batch Training', Keskar 2017) showed large batches converge to sharp minima that generalize poorly.", "b"],
+        ["What is the vanishing gradient problem in training, and how do ReLU and LSTM solve it?", "During backpropagation, gradients are multiplied through each layer's Jacobian. Sigmoid derivative max=0.25; after 10 layers: 0.25^10≈1e-7 → early layers don't update. ReLU solution: f'(z)=1 for z>0 → gradient passes unchanged. LSTM solution: cell state gradient ∂Cₜ/∂Cₜ₋₁=fₜ ≈ 1 when forget gate open → gradient preserved across many timesteps. These are complementary: ReLU fixes depth, LSTM fixes sequence length.", "a"],
+        ["What is BPTT (Backpropagation Through Time)?", "BPTT is backpropagation applied to unrolled RNNs. The recurrent network is 'unrolled' for T steps → equivalent to a T-layer feedforward network with shared weights. Gradients flow backwards through all T timesteps. Problem: for T=1024, this multiplies gradients 1024 times → exponential vanishing/exploding. Truncated BPTT: only backprop through last k steps (e.g., k=50). Less accurate but computationally feasible.", "a"],
+        ["How does the number of epochs relate to overfitting?", "Early epochs: model learns true patterns → train and val loss both decrease. Middle epochs: model starts memorizing training samples → train loss decreases, val loss plateaus. Late epochs: model memorizes noise → train loss continues, val loss increases. Early stopping intercepts at the val_loss minimum. For your 240-sample dataset, overfitting typically starts within 50-100 epochs for ANN.", "b"],
+        ["What is the effect of learning rate on training dynamics?", "Too high (e.g., 0.1): weight updates overshoot minimum → oscillates or diverges. Loss curve: sharp spikes. Too low (e.g., 1e-6): slow convergence, may get stuck in early saddle point. Loss curve: flat. Just right (1e-3 for Adam): smooth decreasing train loss, val loss tracks with ~5% gap. Practical: monitor loss curve. If spiking → reduce lr. If flat → increase lr or check gradient flow.", "b"]];
+
+        const mqResults=[ ["Why did Random Forest (96.67%) outperform ANN (~88-92%) on this dataset?", "Three reasons: (1) Data efficiency — RF with 100 trees, each needing ~sqrt(9)≈3 features per split, is extremely data-efficient. ANN needs enough data to constrain 2,852 parameters. With 240 samples, ANN is underdetermined. (2) Feature engineering quality — your 9 features (especially kurtosis=172 for IR) already encode the bearing physics. RF just needs good splits on these physics-informed features. ANN must re-learn these relationships. (3) RF's bootstrap averaging reduces variance without needing more data; ANN needs Dropout + Early Stopping + BatchNorm to achieve similar regularization effect.", "a"],
+        ["Why did RE recall improve from 81.25% to 100% in Phase 5 but remains challenging for ANN?", "Phase 5's envelope analysis (bandpass 5-7kHz + Hilbert) created a feature that directly captures RE fault signature — envelope_peak was ranked #3 of 14 features. ANN can exploit this feature if you include it. BUT: if ANN is trained only on time-domain features (without envelope), it faces the same masking problem as Random Forest in Phase 4 — kurtosis=0.25 for RE, indistinguishable from OK. Feature quality determines performance; model sophistication cannot compensate for missing information.", "i"],
+        ["Why does XGBoost (88.33%) underperform RF (91.67%) on your 300-sample dataset?", "XGBoost's sequential boosting: Tree 2 is trained on residuals of Tree 1. With 240 samples and 9 features, later trees begin fitting noise (the variance of 240-sample residuals) rather than true patterns. This sequential overfitting is why XGB underperforms. RF's parallel bagging: each tree sees different bootstrap samples → diverse, uncorrelated errors → averaging reduces variance. Empirically: XGBoost wins over RF at 10K+ samples. Below 1K, RF usually wins. This matches your Phase 4 finding exactly.", "i"],
+        ["How do you interpret training accuracy vs validation accuracy divergence?", "Small gap (val_acc ≈ train_acc −2%): model generalizing well. Like your RF: CV accuracy 90.42% ≈ test 91.67% (+1.25%). Large gap (e.g., train_acc=98%, val_acc=75%): overfitting — model memorized training set. Fix: more Dropout, less neurons, more data, L2 regularization. No gap but both low (train_acc=65%, val_acc=63%): underfitting — model too simple. Fix: more neurons, more layers, train longer.", "b"],
+        ["What would happen if you trained the ANN without StandardScaler?", "Kurtosis range: 0.25-172. Mean range: -0.003 to 0.001. Ratio: 172/0.003 ≈ 57,000×. Without scaling, the gradient for kurtosis weight would be 57,000× larger than for mean weight. Adam would give kurtosis weight a very small effective lr and mean weight a very large effective lr. The network would struggle: kurtosis weights oscillate (too fast), mean weights move glacially. Training would be unstable, convergence very slow. Final accuracy likely 10-20% lower.", "i"],
+        ["Why might CNN overfit even with windowing augmentation?", "Windowed samples from the same recording are highly correlated — they share 50% overlap and come from the same bearing at the same operating condition. If all windows from recording #47 (IR fault) are split randomly, the same bearing's patterns appear in both train and test. True generalization test: hold out entire recordings for test (recording-level split), not window-level split. This is a common mistake in vibration DL papers that inflates reported accuracy.", "a"],
+        ["How would you evaluate LSTM performance more rigorously for this dataset?", "Beyond accuracy: (1) Per-class recall — especially RE recall which was your hardest case. (2) Confusion matrix comparing to RF baseline. (3) Precision-Recall curves for each fault class. (4) McNemar's test for statistical significance of accuracy differences. (5) Cross-validation across bearing types (not just random 80/20 split). (6) Visualization of gate values and what patterns the LSTM learned to remember.", "a"],
+        ["If you had 10,000 bearing recordings, how would the ranking change?", "With 10K recordings: CNN would likely win. Reasons: (1) CNN on raw signal with 10K recordings no longer underdetermined — enough data to train 100K+ parameters reliably. (2) CNN can learn RE fault signature from raw signal (discovering the 5-7kHz pattern itself, without Phase 5 envelope analysis). (3) XGBoost would also improve (boosting becomes more effective). RF would likely plateau — its capacity is limited by 9 hand-crafted features. CNN can learn any representation the data supports.", "i"],
+        ["What does a confusion matrix tell you that accuracy doesn't?", "Accuracy: single number — hides per-class failures. Your Phase 4: accuracy=91.67%, RE recall=81.25%. Confusion matrix: shows the specific misclassification pattern — 3 RE samples classified as IR. This reveals: RE and IR are the closest pair in feature space (both have kurtosis < OK's value in some edge cases). Accuracy would not reveal this. For bearing diagnosis: a missed fault (FN) is catastrophic; the confusion matrix shows exactly which fault types are missed.", "b"],
+        ["What is your next step if you were to publish this work?", "(1) Implement CNN-LSTM hybrid — current literature gap for this specific 4-bearing-type dataset. (2) Grad-CAM visualization — compare CNN learned features to your hand-crafted Phase 3-5 features. (3) Cross-bearing-type transfer learning — the dataset was designed for this. (4) Noise robustness study (SNR 0-30 dB). (5) Ablation study: which DL component contributes most? (Remove BatchNorm, Dropout, GlobalAvgPool one at a time, measure accuracy drop). Target: Mechanical Systems and Signal Processing journal.", "a"]];
+
+        function buildMentorQs() {
+            const containers=[ {
+                id:'mq-0', data:mqArch
+            }
+
+            ,
+            {
+            id:'mq-1', data:mqTrain
+        }
+
+        ,
+        {
+        id:'mq-2', data:mqResults
+    }
+
+    ];
+
+    containers.forEach(({
+            id, data
+
+        })=> {
+        const el=document.getElementById(id);
+        if( !el||el.children.length>0)return;
+
+        data.forEach((qa, i)=> {
+                const lvlMap= {
+                    b:'b', i:'i', a:'a'
+                }
+
+                ;
+
+                const lvlLabel= {
+                    b:'Beginner', i:'Intermediate', a:'Advanced'
+                }
+
+                ;
+
+                el.innerHTML += `<div class="acc"><div class="acc-h" onclick="toggleAcc(this)"><div class="acc-q">Q${i+1}. ${qa[0]}</div><div class="acc-meta"><span class="lvl ${lvlMap[qa[2]]}">${lvlLabel[qa[2]]}</span><span class="acc-arr">▼</span></div></div><div class="acc-body">${qa[1]}</div></div>`;
+            });
+    });
+}
+
+// ═══════════════════════════════════════════
+// ACCURACY CHART
+// ═══════════════════════════════════════════
+function drawAccChart() {
+    const canvas=document.getElementById('acc-chart');
+    if( !canvas)return;
+    const ctx=canvas.getContext('2d');
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle='#0b0c14'; ctx.fillRect(0, 0, W, H);
+
+    const pad= {
+        l:60, r:30, t:30, b:50
+    }
+
+    ;
+    const gw=W-pad.l-pad.r, gh=H-pad.t-pad.b;
+
+    // Grid
+    ctx.strokeStyle='#1f2035'; ctx.lineWidth=1;
+
+    for(let i=0; i<=5; i++) {
+        const y=pad.t+gh*(1-i/5);
+        ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l+gw, y); ctx.stroke();
+        ctx.fillStyle='#5c6399'; ctx.font='10px Consolas';
+        ctx.fillText((i*20)+'%', pad.l-32, y+4);
+    }
+
+    for(let i=0; i<=5; i++) {
+        const x=pad.l+gw*(i/5);
+        ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t+gh); ctx.stroke();
+        const labels=['100', '1K', '5K', '10K', '50K', '100K'];
+        ctx.fillStyle='#5c6399'; ctx.font='10px Consolas';
+        ctx.fillText(labels[i], x-12, H-12);
+    }
+
+    ctx.fillStyle='#9ca3cc'; ctx.font='11px Consolas';
+    ctx.fillText('Training Samples →', W/2-55, H-2);
+
+    // Models: [name, color, points [[x_norm, y_norm],...]]
+    const models=[ {
+        name:'Random Forest', color:'#38e0f0', pts:[[0, .9], [.1, .95], [.2, .965], [.4, .97], [1, .97]]
+    }
+
+    ,
+    {
+    name:'XGBoost', color:'#ffb830', pts:[[0, .82], [.1, .88], [.2, .90], [.4, .93], [1, .96]]
+}
+
+,
+{
+name:'ANN', color:'#b06fff', pts:[[0, .65], [.1, .78], [.2, .86], [.4, .91], [1, .95]]
+}
+
+,
+{
+name:'1D CNN', color:'#7fff5a', pts:[[0, .45], [.1, .72], [.2, .88], [.4, .93], [1, .97]]
+}
+
+,
+{
+name:'LSTM', color:'#ff5c7a', pts:[[0, .40], [.1, .68], [.2, .85], [.4, .91], [1, .96]]
+}
+
+,
+];
+
+models.forEach(m=> {
+        ctx.beginPath(); ctx.strokeStyle=m.color; ctx.lineWidth=2;
+
+        m.pts.forEach((p, i)=> {
+                const x=pad.l+gw*p[0], y=pad.t+gh*(1-p[1]);
+                if(i===0)ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            });
+        ctx.stroke();
+        // Label at last point
+        const lp=m.pts[m.pts.length-1];
+        ctx.fillStyle=m.color; ctx.font='10px Inter';
+        ctx.fillText(m.name, pad.l+gw*lp[0]+4, pad.t+gh*(1-lp[1])+4);
+    });
+
+// Axes labels
+ctx.fillStyle='#9ca3cc'; ctx.font='12px Inter';
+ctx.fillText('Accuracy', pad.l-55, pad.t+gh/2);
+}
+
+
+function copyCode(btn) {
+    const pre = btn.parentElement.querySelector('pre');
+    if(!pre) return;
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+        const oldText = btn.innerText;
+        btn.innerText = 'Copied!';
+        setTimeout(() => btn.innerText = oldText, 2000);
+    });
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+show('s0');
+</script> </body> </html>

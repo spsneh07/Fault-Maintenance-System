@@ -1,0 +1,72 @@
+# ══════════════════════════════════════════════════════════════════ # BEARING FAULT DIAGNOSIS — ANN / MLP # Input: bearing_features_phase3.csv (300 rows × 9 features + 1 label) # Output: 4-class fault classifier (OK, IR, OR, RE) # ══════════════════════════════════════════════════════════════════importnumpy asnp importpandas aspd importmatplotlib.pyplot asplt fromsklearn.model_selection importtrain_test_split fromsklearn.preprocessing importStandardScaler,
+LabelEncoder fromsklearn.metrics importclassification_report,
+confusion_matrix importtensorflow astf fromtensorflow.keras.models importSequential fromtensorflow.keras.layers importDense,
+Dropout fromtensorflow.keras.utils importto_categorical fromtensorflow.keras.callbacks importEarlyStopping importseaborn assns # ── STEP 1: LOAD DATA ─────────────────────────────────────────────df=pd.read_csv('bearing_features_phase3.csv' ) # Feature columns — same 9 features from your Phase 3feature_cols=['mean' ,
+'std' ,
+'variance' ,
+'rms' ,
+'peak' ,
+'peak_to_peak' ,
+'crest_factor' ,
+'kurtosis' ,
+'skewness' ] X=df[feature_cols].values # shape: (300, 9)y_raw=df['fault' ].values # ['OK',
+'IR',
+'OR',
+'RE',
+...]print(f"Dataset shape: {X.shape}" ) # (300, 9)print(f"Classes: {np.unique(y_raw)}" ) # ['IR' 'OK' 'OR' 'RE']print(df['fault' ].value_counts()) #~75 per class# ── STEP 2: LABEL ENCODING ────────────────────────────────────────# Convert string labels to integers: IR→1,
+OK→0,
+OR→2,
+RE→3le=LabelEncoder() y_int=le.fit_transform(y_raw) # [0,
+1,
+2,
+3,
+...]print(f"Class mapping: {dict(zip(le.classes_, le.transform(le.classes_)))}" ) # {
+    'IR': 0, 'OK':1, 'OR':2, 'RE':3
+}
+
+— alphabetical ordern_classes=len(le.classes_) # 4# One-hot encode: [0,
+1,
+2,
+3] → [[1,
+0,
+0,
+0],
+[0,
+1,
+0,
+0],
+...]# Required for Softmax+Categorical Cross-Entropyy_onehot=to_categorical(y_int, num_classes=n_classes) print(f"One-hot shape: {y_onehot.shape}" ) # (300, 4)# ── STEP 3: TRAIN-TEST SPLIT ──────────────────────────────────────# 80/20 split,
+stratified to maintain class distributionX_train,
+X_test,
+y_train,
+y_test=train_test_split(X, y_onehot,
+    test_size=0.2,
+    random_state=42,
+    stratify=y_int # stratify on integer labels, not one-hot) print(f"Train: {X_train.shape}, Test: {X_test.shape}" ) # Train: (240, 9) Test: (60, 9)# ── STEP 4: STANDARDSCALER ────────────────────────────────────────# FIT only on training data — then TRANSFORM both train and test# If you fit on all 300 rows: data leakage (test stats contaminate model)scaler=StandardScaler() X_train_scaled=scaler.fit_transform(X_train) # fit+transform trainX_test_scaled=scaler.transform(X_test) # transform only — no fit !# After scaling: mean≈0,
+std≈1 for each of the 9 features# Kurtosis: was 0.25–172,
+now roughly -1 to+3 (z-score)# ── STEP 5: BUILD THE ANN ─────────────────────────────────────────tf.random.set_seed(42) # reproducibilitymodel=Sequential([ # Input shape: (9, ) — 9 features per bearing Dense(64, activation='relu' , input_shape=(9, ),
+        name='hidden_1' ),
+    # → output: (batch, 64). Each of 64 neurons: z=W₁x+b₁, a=ReLU(z) # Why 64? Start with 2-4× input size. Tune via validation loss. Dropout(0.3, name='dropout_1' ),
+    # 30% of neurons randomly zeroed in each forward pass (training only) # Forces redundant representations → prevents memorizing 240 samples Dense(32, activation='relu' , name='hidden_2' ),
+    # → output: (batch, 32). Compresses 64→32 features further. Dropout(0.2, name='dropout_2' ),
+
+    Dense(4, activation='softmax' , name='output' ),
+    # → output: (batch, 4). 4 probabilities summing to 1.0 # Softmax: ŷᵢ=e^zᵢ / Σe^zⱼ → [P(IR), P(OK), P(OR), P(RE)]]) model.summary() # Total trainable params:~2,
+852 — tiny ! RF had much more complexity.# ── STEP 6: COMPILE ───────────────────────────────────────────────model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+    # Adam: adaptive learning rate per parameter. Best default optimizer. # lr=0.001 is the standard starting point for Adam. loss='categorical_crossentropy' ,
+    # Categorical CE for multi-class one-hot targets. # L=−Σ yᵢ·log(ŷᵢ) — only the true class term survives. metrics=['accuracy' ]) # ── STEP 7: CALLBACKS ─────────────────────────────────────────────early_stop=EarlyStopping(monitor='val_loss' , # watch validation loss patience=20, # stop if no improvement for 20 epochs restore_best_weights=True, # revert to best epoch's weights
+ verbose=1) # Equivalent to your cross-validation: prevents overfitting on 240 samples# ── STEP 8: TRAIN ─────────────────────────────────────────────────history=model.fit(X_train_scaled, y_train,
+    epochs=200, # maximum 200 epochs (early stopping will cut this) batch_size=32, # process 32 samples, then update weights once # 240 samples / 32 batch=7.5 → 8 iterations per epoch validation_split=0.2, # hold out 20% of train for val (48 samples) callbacks=[early_stop],
+    verbose=1) # ── STEP 9: EVALUATE ──────────────────────────────────────────────test_loss,
+test_acc=model.evaluate(X_test_scaled, y_test, verbose=0) print(f"Test Accuracy: {test_acc:.4f} ({test_acc*100:.2f}%)" ) # Predictionsy_pred_prob=model.predict(X_test_scaled) # shape: (60, 4)y_pred_int=np.argmax(y_pred_prob, axis=1) # index of max probabilityy_true_int=np.argmax(y_test, axis=1) # recover integer from one-hotprint(classification_report(y_true_int, y_pred_int,
+        target_names=le.classes_)) # Shows precision,
+recall,
+F1 for each class — like your Phase 4# ── STEP 10: TRAINING CURVES ──────────────────────────────────────fig,
+(ax1, ax2)=plt.subplots(1, 2, figsize=(12, 4)) ax1.plot(history.history['accuracy' ], label='Train Acc' , color='#7fff5a' ) ax1.plot(history.history['val_accuracy' ], label='Val Acc' , color='#38e0f0' ) ax1.set_title('Accuracy over Epochs' );
+ax1.legend();
+ax1.set_ylim(0, 1) ax2.plot(history.history['loss' ], label='Train Loss' , color='#ffb830' ) ax2.plot(history.history['val_loss' ], label='Val Loss' , color='#ff5c7a' ) ax2.set_title('Loss over Epochs' );
+ax2.legend() plt.tight_layout();
+plt.show() # ── STEP 11: CONFUSION MATRIX ─────────────────────────────────────cm=confusion_matrix(y_true_int, y_pred_int) plt.figure(figsize=(6, 5)) sns.heatmap(cm, annot=True, fmt='d' , cmap='Blues' ,
+    xticklabels=le.classes_, yticklabels=le.classes_) plt.title('ANN Confusion Matrix — Bearing Fault' ) plt.ylabel('True Label' );
+plt.xlabel('Predicted' ) plt.tight_layout();
+plt.show()

@@ -1,0 +1,25 @@
+# Virtual environments
+.venv/
+.venv_313/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Large data files
+data.csv
+
+# Temporary / Debug files
+debug*.txt
+cells.txt
+scripts.txt
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
